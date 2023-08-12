@@ -1,0 +1,658 @@
+{
+	"events": [
+		{
+			"action": "join",
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "First, I must introduce you to the townsfolk... Help you really understand what and who your working with."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "In the town center right now is Gabe, enjoying a drink in the bar, and Jodi, reading a book in the library. We also have a bartender but he is from out of town... "
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "They aren't too important as they are pretty active in the community. But still no harm in being kind... There is harm in being rude."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "The main three people to worry about is Jayson, Brock, and Steven..."
+		},
+		{
+			"choice": "Jayson",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Jayson?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Jayson is a pretty active member in the community with his fascination for turtles and all. He is actually why I'm reaching out to you."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": " He has been worried about the turtles skipping the ceremony but doesn't realize his impact is what is stopping them..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head east from the town center and he lives atop the hill in one of the largest houses in this town. But beware he doesn't like new people barging in... You can also find him walking around the town tho."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Who else would you like to know about?"
+		},
+		{
+			"choice": "Brock",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Brock?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Awe Brock, he is a sweetheart, really. He is the big muscle man often hovering around the polluted beach. "
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "He loves the sand but doesnt realize his protein shake bottles and long showers hurt the quality of his favorite place..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head west and he is atop the small hill in his tiny, yet very capable, home! But, I shall warn you... its a bit of a mess. Leaking pipes and all! "
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Who else would you like to know about?"
+		},
+		{
+			"choice": "Steven",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Steven?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Steven! Oh he is a young farm boy at heart. He wanted to buy the land east and start a small farm but couldn't get the funding for it."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Only if he had adapted to modern ways such as aquaponics and working with the townies with compost... He tried to set up a drip irrigation system but it didn't pull through."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head west and he lives in the tiny shack by the shoreline! But he is often walking around town."
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"choice": "Steven",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Steven?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Steven! Oh he is a young farm boy at heart. He wanted to buy the land east and start a small farm but couldn't get the funding for it."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Only if he had adapted to modern ways such as aquaponics and working with the townies with compost... He tried to set up a drip irrigation system but it didn't pull through."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head west and he lives in the tiny shack by the shoreline! But he is often walking around town."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Who else would you like to know about?"
+		},
+		{
+			"choice": "Brock",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Brock?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Awe Brock, he is a sweetheart, really. He is the big muscle man often hovering around the polluted beach. "
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "He loves the sand but doesnt realize his protein shake bottles and long showers hurt the quality of his favorite place..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head west and he is atop the small hill in his tiny, yet very capable, home! But, I shall warn you... its a bit of a mess. Leaking pipes and all! "
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"choice": "Brock",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Brock?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Awe Brock, he is a sweetheart, really. He is the big muscle man often hovering around the polluted beach. "
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "He loves the sand but doesnt realize his protein shake bottles and long showers hurt the quality of his favorite place..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head west and he is atop the small hill in his tiny, yet very capable, home! But, I shall warn you... its a bit of a mess. Leaking pipes and all! "
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Who else would you like to know about?"
+		},
+		{
+			"choice": "Jayson",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Jayson?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Jayson is a pretty active member in the community with his fascination for turtles and all. He is actually why I'm reaching out to you."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": " He has been worried about the turtles skipping the ceremony but doesn't realize his impact is what is stopping them..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head east from the town center and he lives atop the hill in one of the largest houses in this town. But beware he doesn't like new people barging in... You can also find him walking around the town tho."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Who else would you like to know about?"
+		},
+		{
+			"choice": "Steven",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Steven?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Steven! Oh he is a young farm boy at heart. He wanted to buy the land east and start a small farm but couldn't get the funding for it."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Only if he had adapted to modern ways such as aquaponics and working with the townies with compost... He tried to set up a drip irrigation system but it didn't pull through."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head west and he lives in the tiny shack by the shoreline! But he is often walking around town."
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"choice": "Steven",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Steven?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Steven! Oh he is a young farm boy at heart. He wanted to buy the land east and start a small farm but couldn't get the funding for it."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Only if he had adapted to modern ways such as aquaponics and working with the townies with compost... He tried to set up a drip irrigation system but it didn't pull through."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head west and he lives in the tiny shack by the shoreline! But he is often walking around town."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Who else would you like to know about?"
+		},
+		{
+			"choice": "Brock",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Brock?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Awe Brock, he is a sweetheart, really. He is the big muscle man often hovering around the polluted beach. "
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "He loves the sand but doesnt realize his protein shake bottles and long showers hurt the quality of his favorite place..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head west and he is atop the small hill in his tiny, yet very capable, home! But, I shall warn you... its a bit of a mess. Leaking pipes and all! "
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"choice": "Steven",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Steven?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Steven! Oh he is a young farm boy at heart. He wanted to buy the land east and start a small farm but couldn't get the funding for it."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Only if he had adapted to modern ways such as aquaponics and working with the townies with compost... He tried to set up a drip irrigation system but it didn't pull through."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head west and he lives in the tiny shack by the shoreline! But he is often walking around town."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Who else would you like to know about?"
+		},
+		{
+			"choice": "Jayson",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Jayson?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Jayson is a pretty active member in the community with his fascination for turtles and all. He is actually why I'm reaching out to you."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": " He has been worried about the turtles skipping the ceremony but doesn't realize his impact is what is stopping them..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head east from the town center and he lives atop the hill in one of the largest houses in this town. But beware he doesn't like new people barging in... You can also find him walking around the town tho."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Who else would you like to know about?"
+		},
+		{
+			"choice": "Brock",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Brock?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Awe Brock, he is a sweetheart, really. He is the big muscle man often hovering around the polluted beach. "
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "He loves the sand but doesnt realize his protein shake bottles and long showers hurt the quality of his favorite place..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head west and he is atop the small hill in his tiny, yet very capable, home! But, I shall warn you... its a bit of a mess. Leaking pipes and all! "
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"choice": "Brock",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Brock?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Awe Brock, he is a sweetheart, really. He is the big muscle man often hovering around the polluted beach. "
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "He loves the sand but doesnt realize his protein shake bottles and long showers hurt the quality of his favorite place..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head west and he is atop the small hill in his tiny, yet very capable, home! But, I shall warn you... its a bit of a mess. Leaking pipes and all! "
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Who else would you like to know about?"
+		},
+		{
+			"choice": "Jayson",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who is Jayson?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Jayson is a pretty active member in the community with his fascination for turtles and all. He is actually why I'm reaching out to you."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": " He has been worried about the turtles skipping the ceremony but doesn't realize his impact is what is stopping them..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head east from the town center and he lives atop the hill in one of the largest houses in this town. But beware he doesn't like new people barging in... You can also find him walking around the town tho."
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Basically make those three people like you by helping them out... Hopefully that will convince them to care more about the environment."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": " And clean up some of the pollution on the beach and the ceremony shall commence!"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "If you get lost check your map by pressing \"m\".\nIf you forget what to do check your current quest by pressing \"q\""
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1643160122.json",
+		"name": "town"
+	}
+}

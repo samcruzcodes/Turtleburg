@@ -1,0 +1,79 @@
+{
+	"events": [
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Hey Jayson I could replace this toilet with a more watersense model if you'd like?"
+		},
+		{
+			"action": "join",
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "What does that mean?"
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Well basically your toilet right now uses about 4 gallons per flush. You can already imagine the waste of water it is already."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "A way to conserve water per flush is always to just follow the \"if its brown flush it down\" method. But, I COMPLETELY understand if your against that..."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "[nw] as am i..."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "With this new water sense model you'd be using 1.28 gallons per flush... A HUGE difference!"
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Wow... I never knew the amount of water I was wasting per flush. I dont know about the whole \"if its brown flush it down\" but I will definitely take the new model!"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642971644.json",
+		"name": "jaytoilet"
+	}
+}

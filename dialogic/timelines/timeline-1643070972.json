@@ -1,0 +1,178 @@
+{
+	"events": [
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"action": "join",
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Joey, you did it! THANK YOU SO MUCH!!!"
+		},
+		{
+			"action": "leaveall",
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_003"
+		},
+		{
+			"action": "join",
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Yeah man for real... We really appreciate all the help!"
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Not just us tho... the turtles do too!"
+		},
+		{
+			"action": "leaveall",
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_003"
+		},
+		{
+			"action": "join",
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I really appreciate the help dude. You fixed more then just my house..."
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "You fixed my heart! qq"
+		},
+		{
+			"action": "leaveall",
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_003"
+		},
+		{
+			"action": "join",
+			"character": "character-1642376548.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642376548.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I dont think you understand the impact you have had on us. I'm going to start the farm and name it after you! "
+		},
+		{
+			"character": "character-1642376548.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "maybe... "
+		},
+		{
+			"character": "character-1642376548.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "AQUAPONICS LETS GOOOOO"
+		},
+		{
+			"action": "leaveall",
+			"character": "character-1642376548.json",
+			"event_id": "dialogic_003"
+		},
+		{
+			"action": "join",
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Looks like your job here is done... I know I wasn't too fond of it at first but I'm glad you stopped here."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Its not done yet Sav... The ceremony is about to begin!"
+		},
+		{
+			"action": "leaveall",
+			"character": "[All]",
+			"event_id": "dialogic_003"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1643070972.json",
+		"name": "theend"
+	}
+}

@@ -1,0 +1,20 @@
+{
+	"color": "#ffe2ee0c",
+	"description": "",
+	"display_name": "",
+	"display_name_bool": false,
+	"id": "character-1642288578.json",
+	"mirror_portraits": false,
+	"name": "Kate",
+	"nickname": "",
+	"nickname_bool": false,
+	"offset_x": 52,
+	"offset_y": 0,
+	"portraits": [
+		{
+			"name": "Default",
+			"path": "res://Sprites/Kate.png"
+		}
+	],
+	"scale": 128
+}

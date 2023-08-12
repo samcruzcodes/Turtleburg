@@ -1,0 +1,187 @@
+[gd_scene load_steps=62 format=2]
+
+[ext_resource path="res://Scripts/Start Menu.gd" type="Script" id=1]
+[ext_resource path="res://themes/8-BIT WONDER.TTF" type="DynamicFontData" id=2]
+[ext_resource path="res://themes/menu theme.tres" type="Theme" id=3]
+[ext_resource path="res://Scripts/load.gd" type="Script" id=4]
+[ext_resource path="res://menu/v1nmove4.bmp" type="Texture" id=5]
+[ext_resource path="res://menu/Frame-3.bmp" type="Texture" id=6]
+[ext_resource path="res://menu/Frame-5.bmp" type="Texture" id=7]
+[ext_resource path="res://menu/Frame-6.bmp" type="Texture" id=8]
+[ext_resource path="res://menu/Frame-1.bmp" type="Texture" id=9]
+[ext_resource path="res://menu/Frame-2.bmp" type="Texture" id=10]
+[ext_resource path="res://menu/Frame-4.bmp" type="Texture" id=11]
+[ext_resource path="res://menu/Frame-20.bmp" type="Texture" id=12]
+[ext_resource path="res://menu/Frame-22.bmp" type="Texture" id=13]
+[ext_resource path="res://menu/Frame-17.bmp" type="Texture" id=14]
+[ext_resource path="res://menu/Frame-19.bmp" type="Texture" id=15]
+[ext_resource path="res://menu/Frame-21.bmp" type="Texture" id=16]
+[ext_resource path="res://menu/Frame-18.bmp" type="Texture" id=17]
+[ext_resource path="res://menu/Frame-8.bmp" type="Texture" id=18]
+[ext_resource path="res://menu/Frame-11.bmp" type="Texture" id=19]
+[ext_resource path="res://menu/Frame-9.bmp" type="Texture" id=20]
+[ext_resource path="res://menu/Frame-12.bmp" type="Texture" id=21]
+[ext_resource path="res://menu/Frame-13.bmp" type="Texture" id=22]
+[ext_resource path="res://menu/Frame-10.bmp" type="Texture" id=23]
+[ext_resource path="res://menu/Frame-14.bmp" type="Texture" id=24]
+[ext_resource path="res://menu/Frame-15.bmp" type="Texture" id=25]
+[ext_resource path="res://menu/Frame-7.bmp" type="Texture" id=26]
+[ext_resource path="res://menu/Frame-16.bmp" type="Texture" id=27]
+[ext_resource path="res://menu/Frame-24.bmp" type="Texture" id=28]
+[ext_resource path="res://menu/Frame-25.bmp" type="Texture" id=29]
+[ext_resource path="res://menu/van-5.bmp" type="Texture" id=30]
+[ext_resource path="res://menu/Frame-26.bmp" type="Texture" id=31]
+[ext_resource path="res://menu/Frame-29.bmp" type="Texture" id=32]
+[ext_resource path="res://menu/Frame-28.bmp" type="Texture" id=33]
+[ext_resource path="res://menu/van-4.bmp" type="Texture" id=34]
+[ext_resource path="res://menu/Frame-23.bmp" type="Texture" id=35]
+[ext_resource path="res://menu/van-2.bmp" type="Texture" id=36]
+[ext_resource path="res://menu/van-3.bmp" type="Texture" id=37]
+[ext_resource path="res://menu/Frame-27.bmp" type="Texture" id=38]
+[ext_resource path="res://menu/van-1.bmp" type="Texture" id=39]
+[ext_resource path="res://menu/v1nmove5.bmp" type="Texture" id=40]
+[ext_resource path="res://menu/v1nmove6.bmp" type="Texture" id=41]
+[ext_resource path="res://menu/v1nmove7.bmp" type="Texture" id=42]
+[ext_resource path="res://menu/v1nmove12.bmp" type="Texture" id=43]
+[ext_resource path="res://menu/v1nmove13.bmp" type="Texture" id=44]
+[ext_resource path="res://menu/v1nmove1.bmp" type="Texture" id=45]
+[ext_resource path="res://menu/v1nmove14.bmp" type="Texture" id=46]
+[ext_resource path="res://menu/v1nmove10.bmp" type="Texture" id=47]
+[ext_resource path="res://menu/v1nmove16.bmp" type="Texture" id=48]
+[ext_resource path="res://menu/v1nmove2.bmp" type="Texture" id=49]
+[ext_resource path="res://menu/v1nmove17.bmp" type="Texture" id=50]
+[ext_resource path="res://menu/v1nmove11.bmp" type="Texture" id=51]
+[ext_resource path="res://menu/v1nmove3.bmp" type="Texture" id=52]
+[ext_resource path="res://menu/v1nmove8.bmp" type="Texture" id=53]
+[ext_resource path="res://menu/v1nmove9.bmp" type="Texture" id=54]
+[ext_resource path="res://menu/v1nmove15.bmp" type="Texture" id=55]
+[ext_resource path="res://menu/vanmove.png" type="Texture" id=56]
+
+[sub_resource type="DynamicFont" id=1]
+font_data = ExtResource( 2 )
+
+[sub_resource type="Theme" id=2]
+default_font = SubResource( 1 )
+
+[sub_resource type="SpriteFrames" id=4]
+animations = [ {
+"frames": [ ExtResource( 9 ), ExtResource( 10 ), ExtResource( 6 ), ExtResource( 11 ), ExtResource( 7 ), ExtResource( 8 ), ExtResource( 26 ), ExtResource( 18 ), ExtResource( 20 ), ExtResource( 23 ), ExtResource( 19 ), ExtResource( 21 ), ExtResource( 22 ), ExtResource( 24 ), ExtResource( 25 ), ExtResource( 27 ), ExtResource( 14 ), ExtResource( 17 ), ExtResource( 15 ), ExtResource( 12 ), ExtResource( 16 ), ExtResource( 13 ), ExtResource( 35 ), ExtResource( 28 ), ExtResource( 29 ), ExtResource( 31 ), ExtResource( 38 ), ExtResource( 33 ), ExtResource( 32 ) ],
+"loop": true,
+"name": "default",
+"speed": 5.0
+} ]
+
+[sub_resource type="SpriteFrames" id=5]
+animations = [ {
+"frames": [ ExtResource( 39 ), ExtResource( 36 ), ExtResource( 37 ), ExtResource( 34 ), ExtResource( 30 ) ],
+"loop": true,
+"name": "default",
+"speed": 5.0
+}, {
+"frames": [ ExtResource( 45 ), ExtResource( 49 ), ExtResource( 52 ), ExtResource( 5 ), ExtResource( 40 ), ExtResource( 41 ), ExtResource( 42 ), ExtResource( 53 ), ExtResource( 54 ), ExtResource( 47 ), ExtResource( 51 ), ExtResource( 43 ), ExtResource( 44 ), ExtResource( 46 ), ExtResource( 55 ), ExtResource( 48 ), ExtResource( 50 ), ExtResource( 56 ) ],
+"loop": false,
+"name": "off screen",
+"speed": 5.0
+} ]
+
+[sub_resource type="DynamicFont" id=3]
+size = 50
+outline_color = Color( 0, 0, 0, 1 )
+font_data = ExtResource( 2 )
+
+[node name="Menu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -1.07068
+margin_right = 2.0
+margin_bottom = -1.07068
+theme = SubResource( 2 )
+script = ExtResource( 1 )
+
+[node name="background" type="AnimatedSprite" parent="."]
+position = Vector2( 639, 360.571 )
+scale = Vector2( 1.91071, 1.84439 )
+frames = SubResource( 4 )
+frame = 16
+speed_scale = 1.5
+playing = true
+
+[node name="van" type="AnimatedSprite" parent="."]
+position = Vector2( 845, 459.071 )
+scale = Vector2( 0.684522, 0.630903 )
+frames = SubResource( 5 )
+frame = 2
+speed_scale = 3.0
+playing = true
+
+[node name="van2" type="AnimatedSprite" parent="."]
+visible = false
+position = Vector2( 878, 459.071 )
+scale = Vector2( 0.684522, 0.630903 )
+frames = SubResource( 5 )
+animation = "off screen"
+speed_scale = 3.0
+
+[node name="Label" type="Label" parent="."]
+margin_left = 96.0
+margin_top = 92.0
+margin_right = 598.0
+margin_bottom = 169.0
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme = ExtResource( 3 )
+custom_colors/font_color = Color( 0.0862745, 1, 0.184314, 1 )
+custom_colors/font_outline_modulate = Color( 0.0862745, 1, 0.184314, 1 )
+custom_colors/font_color_shadow = Color( 0.0666667, 0.462745, 0.109804, 1 )
+custom_constants/shadow_offset_x = -1
+custom_constants/shadow_offset_y = 3
+custom_fonts/font = SubResource( 3 )
+text = "TURTLEBURG"
+uppercase = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -424.0
+margin_top = 169.071
+margin_right = -254.0
+margin_bottom = 238.071
+rect_scale = Vector2( 1.5, 1.5 )
+focus_mode = 1
+theme = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Start" type="Button" parent="VBoxContainer"]
+margin_right = 170.0
+margin_bottom = 20.0
+focus_neighbour_top = NodePath("../Quit")
+theme = ExtResource( 3 )
+text = "New Game"
+
+[node name="Load" type="Button" parent="VBoxContainer"]
+visible = false
+margin_top = 24.0
+margin_right = 170.0
+margin_bottom = 44.0
+theme = ExtResource( 3 )
+text = "continue"
+script = ExtResource( 4 )
+
+[node name="Quit" type="Button" parent="VBoxContainer"]
+margin_top = 24.0
+margin_right = 170.0
+margin_bottom = 44.0
+focus_neighbour_bottom = NodePath("../Start")
+theme = ExtResource( 3 )
+text = "Quit"
+
+[connection signal="animation_finished" from="van2" to="." method="_on_van2_animation_finished"]
+[connection signal="pressed" from="VBoxContainer/Start" to="." method="_on_Start_pressed"]
+[connection signal="pressed" from="VBoxContainer/Load" to="." method="_on_Controls_pressed"]
+[connection signal="pressed" from="VBoxContainer/Load" to="VBoxContainer/Load" method="_on_HowToPlay_pressed"]
+[connection signal="pressed" from="VBoxContainer/Quit" to="." method="_on_Quit_pressed"]

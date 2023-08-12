@@ -1,0 +1,470 @@
+{
+	"events": [
+		{
+			"character": "",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "\t\t\t\t\t\t\t\t\t\t\t* ring ring *"
+		},
+		{
+			"action": "join",
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Hello?"
+		},
+		{
+			"character": "",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Oh... Yes... Of course!"
+		},
+		{
+			"character": "",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Thank you Savannah, cant wait to meet Joey. I think I just saw him enter, have a great rest of your day!"
+		},
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Welcome, Joey is that you? I just got off the phone with Savannah, I've heard great things! We are so glad to have you here!"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "So, what do you wanna know about this small town?"
+		},
+		{
+			"choice": "Natal homing event.",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "What do you mean, need my help? Savannah said this is a vacation..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Well I spoke to her and she said its fine but we need you to convince the towns people to care more about the environment..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I dont know if Sav told you but over the last couple of years less turtles have been coming to the ceremony because of the pollution and the lack of clean water."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "I was hoping, hearing that you are a plumber and dazzle in the water crisis that you would be willing to convince the towns people to start recycling and conserve water better..."
+		},
+		{
+			"choice": "Sure, I'd love to!",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I'd love to! How should I go about doing it..."
+		},
+		{
+			"choice": "Uhh... I dont know...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I dont know ma'am. I was hoping to get a little vacation and enjoy a ceremony..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Well without your help there will be no ceremony to enjoy. Please... help us."
+		},
+		{
+			"choice": "Sure...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Sure... How should I go about doing that?"
+		},
+		{
+			"choice": "Nahhh",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Sorry but like, I dont know...."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Please..."
+		},
+		{
+			"choice": "Sure...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Sure... How should I go about doing that?"
+		},
+		{
+			"choice": "No...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Kate, I'm sorry but I cant..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "We need you..."
+		},
+		{
+			"choice": "Sure",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Sure... How should I go about doing that?"
+		},
+		{
+			"choice": "No",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Kate... Im not gonna say yes."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "You will..."
+		},
+		{
+			"choice": "Yes",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "-_- Yes... How should I go about doing that?"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Perfect! Just perfect! "
+		},
+		{
+			"choice": "How can I help?",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I hope Sav doesn't mind... How could I help?"
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Well... We would need you to go talk to the townies about pollution and water conservation... Convince them to care more and hopefully they will put in the work."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I dont know if Sav told you but over the last couple of years less turtles have been coming to the ceremony because of the pollution and the lack of clean water."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "I was hoping, hearing that you are a plumber and interested in the ecosystem that you would be willing to..."
+		},
+		{
+			"choice": "Sure, I'd love to!",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I'd love to! How should I go about doing it..."
+		},
+		{
+			"choice": "I dont know...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I dont know ma'am. I was hoping to get a little vacation and enjoy a ceremony..."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Well without your help there will be no ceremony to enjoy. Please... help us."
+		},
+		{
+			"choice": "Sure...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Sure... How should I go about doing that?"
+		},
+		{
+			"choice": "Nahhh",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Sorry but like, I dont know...."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Please..."
+		},
+		{
+			"choice": "Ok",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Ok... I will, how should I go about doing that?"
+		},
+		{
+			"choice": "No",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Kate... I'm not going to say yes."
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "You will..."
+		},
+		{
+			"choice": "Yes.",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "-_- Yes... How should I go about doing that?"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"change_timeline": "timeline-1643160122.json",
+			"event_id": "dialogic_020"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642987883.json",
+		"name": "towncenter"
+	}
+}

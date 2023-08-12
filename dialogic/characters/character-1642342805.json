@@ -1,0 +1,20 @@
+{
+	"color": "#ff4a4646",
+	"description": "",
+	"display_name": "",
+	"display_name_bool": false,
+	"id": "character-1642342805.json",
+	"mirror_portraits": true,
+	"name": "Jayson",
+	"nickname": "",
+	"nickname_bool": false,
+	"offset_x": 53,
+	"offset_y": 7,
+	"portraits": [
+		{
+			"name": "Default",
+			"path": "res://Sprites/Jayson.png"
+		}
+	],
+	"scale": 75
+}

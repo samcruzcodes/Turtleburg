@@ -1,0 +1,49 @@
+{
+	"events": [
+		{
+			"character": "",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Would you like to exit?"
+		},
+		{
+			"choice": "Yes.",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"change_scene": "res://Scenes/World.tscn",
+			"event_id": "dialogic_041"
+		},
+		{
+			"call_node": {
+				"arguments": [
+
+				],
+				"method_name": "_enter_tree",
+				"target_node_path": "../../../../../towndoor"
+			},
+			"event_id": "dialogic_042"
+		},
+		{
+			"choice": "No.",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"event_id": "dialogic_013"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642361631.json",
+		"name": "townleave"
+	}
+}

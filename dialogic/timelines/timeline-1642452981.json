@@ -1,0 +1,91 @@
+{
+	"events": [
+		{
+			"character": "character-1642453052.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Want a drink?"
+		},
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"choice": "Yes",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "bartender passes drink*"
+		},
+		{
+			"character": "character-1642453052.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "On the house! It's pretty strong so goodluck."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "gulp *"
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I haven't had a drink this good in a while! Might have to come around for more."
+		},
+		{
+			"character": "character-1642453052.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Come back anytime friend."
+		},
+		{
+			"choice": "No",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Hmmm Im good, thanks."
+		},
+		{
+			"character": "character-1642453052.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Alrighty, well come back anytime."
+		},
+		{
+			"event_id": "dialogic_013"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642452981.json",
+		"name": "bartender"
+	}
+}

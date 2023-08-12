@@ -1,0 +1,15 @@
+{
+	"events": [
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Welcome to the town center!"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642364366.json",
+		"name": "towncenter1"
+	}
+}

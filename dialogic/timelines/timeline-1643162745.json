@@ -1,0 +1,15 @@
+{
+	"events": [
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Hey your almost done! You just need to pick up some trash on the beach. Pick up 5 to start the event."
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1643162745.json",
+		"name": "pollution"
+	}
+}

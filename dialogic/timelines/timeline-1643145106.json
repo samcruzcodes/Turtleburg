@@ -1,0 +1,73 @@
+{
+	"events": [
+		{
+			"action": "join",
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Im sorry bro... I told you I got a mess."
+		},
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "No... thats why I'm here. I got you!"
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "The mess aside I can fix the pipes install a water sense model and save you 2 gallons of water per flush."
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "That sounds like good... How good is it?"
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Very good my friend... And I mean who wouldn't want a free cleaning?"
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Count me in! Install it brother!"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1643145106.json",
+		"name": "brocktoilet"
+	}
+}

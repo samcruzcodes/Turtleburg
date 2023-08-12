@@ -1,0 +1,239 @@
+{
+	"events": [
+		{
+			"action": "join",
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Yoooo I heard a random guy was snooping around town but I thought the peeps were lying. We don’t get visitors much around here. I'm Jayson btw."
+		},
+		{
+			"choice": "Yup, thats me!",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Oh haha the snoop must be me. I’m Joey, I was passing by this town and had to check it out."
+		},
+		{
+			"choice": "Snoop?!?",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": " I’m no snoop... I was just passing by this town on the road and had to check it out. A nice little beach town vacation, who wouldn’t want that?"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "When you live here for a while it gets old. I honestly barely leave my house somedays. Today is different tho because it’s the natal homing ceremony!"
+		},
+		{
+			"choice": "I heard!",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Oh, I heard, I was pretty excited. As a plumber, I’m very passionate about anything revolving around water. I was actually ordered by the receptionist to help the town get together for it."
+		},
+		{
+			"choice": "Thats why Im here!",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Believe it or not... thats why I'm here! Originally it was a small vacation but the receptionist told me ya'll could use some help prepping for it... As a plumber the water crisis is kinda my thing."
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Yooo same here! I'm no plumber but I do find the water crisis to be a serious not spoken enough issue... I dont know if she told you but I actually asked if she could get someone to help us out."
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Dude if you dont mind drop by my place and help me out. I probably have a few things I should work on!"
+		},
+		{
+			"choice": "Sure",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Sure bro! I heard you live on the east atop the hill I'll come check it out."
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Cant wait! Im glad you're here bro."
+		},
+		{
+			"choice": "Nah",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Nah bro... I got things to do."
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Well if you ever get the time... Just drop by I live on the hill east."
+		},
+		{
+			"choice": "I'll see",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Alright bro... Just for you I'll see if I can."
+		},
+		{
+			"choice": "Hmm... Nah",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Hmm.. I dont think I will."
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "You will"
+		},
+		{
+			"choice": "Sure man!",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "-_- Sure man! I got you. -_-"
+		},
+		{
+			"choice": "Sounds awesome!",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "-_- SOUNDS AWESOME! I'll be there. -_-"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642552019.json",
+		"name": "jayson0"
+	}
+}

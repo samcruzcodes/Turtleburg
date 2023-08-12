@@ -1,0 +1,593 @@
+{
+	"events": [
+		{
+			"character": "",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "\t\t\t\t\t\t\t\t\t\t\t* ring ring *"
+		},
+		{
+			"character": "",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Hello?"
+		},
+		{
+			"character": "character-1642279753.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "YOU KNOW YOU CANT STOP HERE! You have a busy schedule get back on the road Joey..."
+		},
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I can take a little break it'll be okay. Anyways, I have a strong feeling about this place Savannah. Like they can use a new face for today."
+		},
+		{
+			"action": "join",
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Alright... I'll push your schedule to clear the day. But tomorrow your back on the road!"
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Thanks, sounds good. So, do you know anything about this place?"
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "As your assistant it’s my JOB to know everything around here... Of course, I do."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Alright... good because I'ma need some help here..."
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Alright so this is Turtleburg, a beach town right on the coast. Apparently, every year around this time they have some sort of natal homing ceremony."
+		},
+		{
+			"choice": "What is that? ",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Natal homing, what even is that? "
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Well basically sea turtles go back to their homeplace to reproduce. In this case they come to the shoreline and head back home."
+		},
+		{
+			"choice": "Thats so cool...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "That sounds dope, I wonder what their shorelines water quality is like. I mean its the 21st century pollution is on the rise and i think we both know how BAD the water crisis is."
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Yeah especially with how little people treat the severity of water conservation. We've got people leaving the sink on while brushing their teeth. Peoples shower heads exerting WAY MORE water then it has to."
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "And don’t even get me started with the amount of water wasted PER FLUSH of the toilet."
+		},
+		{
+			"choice": "I know.",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Savannah... trust me... I know. I’m the guy you call to replace those things after all."
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Well if I’m going to be pushing your schedule back today better be a break... not a free plumbing service."
+		},
+		{
+			"choice": "No promises...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "No promises Sav... you know me. I've got to help people... its what I was put on this earth to do..."
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I was put on this earth to help you... Sadly... So how about I help you get around this place."
+		},
+		{
+			"choice": "Ill try...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Ill try but its my JOB Sav. I've got to help out when im needed..."
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Well its my JOB to help you. So how about I help you get around this place."
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"choice": "Thats crazy.",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "If I weren't a plumber myself I would think thats insane. Might just have to take my tools out for this place."
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Well if I’m going to be pushing your schedule back today better be a break... not a free plumbing service."
+		},
+		{
+			"choice": "No promises...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "No promises Sav... you know me. I've got to help people... its what I was put on this earth to do..."
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I was put on this earth to help you... Sadly... So how about I help you get around this place."
+		},
+		{
+			"choice": "Ill try...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Ill try but its my JOB Sav. I've got to help out when im needed..."
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Well its my job to help you. So how about I help you get around this place."
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"choice": "Really?",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Really? With a tradition like that their water quality must be insanely good. Thats rare... we both know how bad water conservation and pollution is..."
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Actually I've heard their water quality has gone down in the past couple of years making less and less sea turtles come to the shoreline..."
+		},
+		{
+			"choice": "That's so sad...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Thats so sad... Right when you think there is some good in the world. Guess thats why I'm here to help!"
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "No its not... Today's meant to be a break. Not a free plumbing service..."
+		},
+		{
+			"choice": "I love to help!",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "What can I say Sav... I love to help!"
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "How about I help you get around this place first..."
+		},
+		{
+			"choice": "Who said free???",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Who said free... I'm just taking a different type of payment today!"
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "We can talk about this later... How about I just help you get around this place first."
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"choice": "So I should help!",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "If im here it MUST be a sign to help these people!"
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "No Joey... Today is meant to be a break not a free plumbing service..."
+		},
+		{
+			"choice": "Who said free?",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I never said free... Just taking a different type of payment today!"
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "We can talk about this later. First let me help you around this place..."
+		},
+		{
+			"choice": "I love to help!",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Im sorry Sav. What can I say, I love to help!"
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "How about I help you around this place first..."
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"choice": "I've heard about that...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I've heard about that, kinda crazy how sea turtles are connected to their home turfs like that."
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Yeah well I've actually heard this place has struggled with its water quality going down and less turtles coming to the shoreline. "
+		},
+		{
+			"choice": "Thats so sad...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Thats so sad... Right when you think there is some good in the world. Guess thats why I'm here to help!"
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "No its not... Today's meant to be a break. Not a free plumbing service..."
+		},
+		{
+			"choice": "I love to help...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "What can I say, I love to help! "
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Alright Mr. Helper how about I help you get around."
+		},
+		{
+			"choice": "Who said free...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I never said free... just a different type of payment..."
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "How about I pay you with a guide around this place..."
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"choice": "So I SHOULD help...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "So my help is needed after all? "
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "No its not... Today's meant to be a break. Not a free plumbing service..."
+		},
+		{
+			"choice": "I love to help...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Alright Mr. Helper how about I help you get around."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "What can I say, I love to help! :D"
+		},
+		{
+			"choice": "Who said free...",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I never said free... just a different type of payment..."
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Movement Keys : W or Arrow Up = move up \n\t\t\t\t\t\t\t S or Arrow Down = move down \n\t\t\t\t\t\t\t A or Arrow Left = move left\n\t\t\t\t\t\t\t D or Arrow Right = move right"
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "\t\tSpace to interact with townsfolk, doors, and exits.\n\t\t\t\t\t\t\t\t\tCTRL + S = save"
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Head to the townhall, following the arrows, and speak with the receptionist Kate."
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642280010.json",
+		"name": "Start"
+	}
+}

@@ -1,0 +1,133 @@
+{
+	"events": [
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Hey!"
+		},
+		{
+			"character": "character-1642453155.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "oh... h-hello."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Whats your name?"
+		},
+		{
+			"character": "character-1642453155.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "umm... Jodi, yours?"
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Its Joey, Joe for short."
+		},
+		{
+			"character": "character-1642453155.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "oh... t-thats nice."
+		},
+		{
+			"character": "",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Would you like to ask more about her or end the conversation?"
+		},
+		{
+			"choice": "Ask more about her",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "What book are you reading?"
+		},
+		{
+			"character": "character-1642453155.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Harry Potter... its one of my favorite series."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I used to love Harry Potter, it was one of my favorites too!"
+		},
+		{
+			"character": "character-1642453155.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "w-well... I'm getting to a really good part if you dont mind I'm gonna get back to reading."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Oh yeah of course, talk to you later Jodi!"
+		},
+		{
+			"character": "character-1642453155.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Bye."
+		},
+		{
+			"choice": "End conversation",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Alright, its been fun chatting Jodi. Adios"
+		},
+		{
+			"character": "character-1642453155.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "oh... Goodbye."
+		},
+		{
+			"event_id": "dialogic_013"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642456738.json",
+		"name": "jodi0"
+	}
+}
