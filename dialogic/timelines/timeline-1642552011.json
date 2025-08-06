@@ -1,0 +1,73 @@
+{
+	"events": [
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"action": "join",
+			"character": "character-1642376548.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Hey man. Im Joey I came down to visit and heard about the natal homing ceremony!"
+		},
+		{
+			"character": "character-1642376548.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I heard about you! Hey Joey, I can't wait either. Personally though, I feel like I dont deserve to go..."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "How so?"
+		},
+		{
+			"character": "character-1642376548.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I dont know if Kate told you but originally I was gonna start a farm. But over the last year it hasn't gone well... I feel that if maybe I did start it... successfully. We wouldn't be facing such a crisis."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Bro that is not on you at all... Yes, you could've made an impact but not your fault for not being able to..."
+		},
+		{
+			"character": "character-1642376548.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Thanks man, appreciate it! See ya around."
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642552011.json",
+		"name": "steven0"
+	}
+}

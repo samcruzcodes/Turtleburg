@@ -1,0 +1,119 @@
+{
+	"events": [
+		{
+			"action": "join",
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "DONT LOOK AT THAT! its uhhh personal stuff."
+		},
+		{
+			"choice": "Loser",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Wait are u a loser? I mean I can see why ur towns struggling with pollution. Your too focused on weird figurines to even think about the turtles..."
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "DIDNT KATE TELL YOU?!? Im the reason your even here... What do you mean, I dont care??"
+		},
+		{
+			"choice": "We all have hobbies",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "It's alright, we all have hobbies afterall..."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I hear you are also into turtles and thats why I'm here... To help the town care more about the environment with pollution and water conservation."
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Ahh yeah. I've hated the last couple of ceremonies and have you seen the beach? The town just doesn't care..."
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "If there is anything I can do to help, let me know!"
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Let me check out the bathroom and we'll see from there..."
+		},
+		{
+			"event_id": "dialogic_013"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642894146.json",
+		"name": "table"
+	}
+}

@@ -1,0 +1,51 @@
+{
+	"events": [
+		{
+			"character": "",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Knock on Jaysons door?"
+		},
+		{
+			"choice": "Yes",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "*Knock knock*"
+		},
+		{
+			"character": "character-1642342805.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Joey... is that you? Come on in!"
+		},
+		{
+			"change_scene": "res://Scenes/Jaysonhome.tscn",
+			"event_id": "dialogic_041"
+		},
+		{
+			"choice": "No",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"event_id": "dialogic_013"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642406286.json",
+		"name": "jaysondoor2"
+	}
+}

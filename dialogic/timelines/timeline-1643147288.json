@@ -1,0 +1,91 @@
+{
+	"events": [
+		{
+			"character": "",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Knock on Brock's door?"
+		},
+		{
+			"choice": "Yes.",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "* knock knock *"
+		},
+		{
+			"action": "join",
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Your a new face... What's ya name?"
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Hey, Im Joey. I'm just dropping by the town and Kate told me to just chat around."
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "OHHH your the plumber I've been hearing about... I could actually use your help. Come on in!"
+		},
+		{
+			"change_scene": "res://Scenes/brockhome.tscn",
+			"event_id": "dialogic_041"
+		},
+		{
+			"choice": "No.",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"event_id": "dialogic_013"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1643147288.json",
+		"name": "brockdontknow"
+	}
+}

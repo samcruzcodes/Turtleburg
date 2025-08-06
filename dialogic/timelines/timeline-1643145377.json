@@ -1,0 +1,79 @@
+{
+	"events": [
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"action": "join",
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Sorry about the mess bro... I really need to clean up more."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Brock... I understand. We all struggle sometimes."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Good thing I'm here tho. Your wasting crazy amounts of water with this showerhead... How long are your showers?"
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I try to keep it under 10 minutes but I do shower like three times a day because I'm a sweaty man... "
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Ahhh yeah... If you need to take multiple showers perhaps cut it down to 5 minutes per... "
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Want the install?"
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "For sure brother! Anything for a clean beach..."
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1643145377.json",
+		"name": "brocktub"
+	}
+}

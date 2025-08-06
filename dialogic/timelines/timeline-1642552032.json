@@ -1,0 +1,104 @@
+{
+	"events": [
+		{
+			"action": "join",
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Whats up man, who are you?"
+		},
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I'm just a plumber from out of town. Stopped by for the beach staying a bit for the ceremony."
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I DONT blame ya. I love this beach. It's like my home."
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": " Sucks that it's losing its beauty."
+		},
+		{
+			"choice": "losing its beauty?",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "What do you mean by losing its beauty? Looks great to me!"
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Well... if you haven't heard the last few years because of water pollution and us taking horrible care of the environment turtles have stopped coming for the ceremony..."
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "When turtles have feelings you know its a problem... qq"
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Oh... Yes I've heard! I was hoping I could help out with this. Maybe I can drop by your place and see what I can do to help?"
+		},
+		{
+			"character": "character-1642376564.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Honestly... sounds awesome dude! I live on the west coast on a hill... Drop by anytime :D"
+		},
+		{
+			"event_id": "dialogic_013"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642552032.json",
+		"name": "brock0"
+	}
+}

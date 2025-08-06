@@ -1,0 +1,159 @@
+{
+	"events": [
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"character": "character-1642453092.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Ya new 'round these parts?"
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Yeah, just heard about the ceramony and wanted to check it out."
+		},
+		{
+			"character": "character-1642453092.json",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Whered'ya come from mister?"
+		},
+		{
+			"choice": "Lie",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I come from nunya, you should check it out."
+		},
+		{
+			"character": "character-1642453092.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Alright bud."
+		},
+		{
+			"choice": "Truth",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I come from up north in a small town called Duckwater."
+		},
+		{
+			"character": "character-1642453092.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I've heard of that place always wanted to visit. I've lived here all my life."
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Must be nice with the breeze from the coast."
+		},
+		{
+			"character": "character-1642453092.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "I might be an old soul, hitting 50 soon, but I wish I could go venture the world ya know."
+		},
+		{
+			"character": "",
+			"event_id": "dialogic_010",
+			"options": [
+
+			],
+			"portrait": "",
+			"question": "Continue conversation?"
+		},
+		{
+			"choice": "Yes",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Whats stopping you, 50 is still young."
+		},
+		{
+			"character": "character-1642453092.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "You youngstas always sweeting us oldies up. I mean its possible but ya know laziness. *chuckle*"
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Im not sweeting you up, just love seeing people follow their dreams. If you ever do go venturing let me know!"
+		},
+		{
+			"character": "character-1642453092.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Will do! Its been a pleasure talking to ya."
+		},
+		{
+			"choice": "No",
+			"condition": "",
+			"definition": "",
+			"event_id": "dialogic_011",
+			"value": ""
+		},
+		{
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "It's been fun chatting, gotta run!"
+		},
+		{
+			"character": "character-1642453092.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Adios compadre."
+		},
+		{
+			"event_id": "dialogic_013"
+		},
+		{
+			"event_id": "dialogic_013"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642453682.json",
+		"name": "gabe0"
+	}
+}

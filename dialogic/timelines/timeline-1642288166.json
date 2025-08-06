@@ -1,0 +1,52 @@
+{
+	"events": [
+		{
+			"action": "join",
+			"character": "character-1642268344.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": true,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": false
+			}
+		},
+		{
+			"action": "join",
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_002",
+			"mirror": false,
+			"portrait": "",
+			"position": {
+				"0": false,
+				"1": false,
+				"2": false,
+				"3": false,
+				"4": true
+			}
+		},
+		{
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "This is the town center. People gather here for drinks and books from the mini library. I'll speak with the receptionist Kate in a second and let her know about you visiting the town. "
+		},
+		{
+			"action": "leaveall",
+			"character": "character-1642267887.json",
+			"event_id": "dialogic_003"
+		},
+		{
+			"change_timeline": "timeline-1642987883.json",
+			"event_id": "dialogic_020"
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1642288166.json",
+		"name": "towncenter0"
+	}
+}

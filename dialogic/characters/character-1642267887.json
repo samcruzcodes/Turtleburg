@@ -1,0 +1,20 @@
+{
+	"color": "#ffec8b1a",
+	"description": "",
+	"display_name": "",
+	"display_name_bool": false,
+	"id": "character-1642267887.json",
+	"mirror_portraits": true,
+	"name": "Savannah",
+	"nickname": "Sav",
+	"nickname_bool": true,
+	"offset_x": 53,
+	"offset_y": 20,
+	"portraits": [
+		{
+			"name": "Default",
+			"path": "res://Sprites/Sav.png"
+		}
+	],
+	"scale": 68
+}

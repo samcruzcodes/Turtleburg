@@ -1,0 +1,20 @@
+{
+	"color": "#ff9c5318",
+	"description": "",
+	"display_name": "",
+	"display_name_bool": false,
+	"id": "character-1642376564.json",
+	"mirror_portraits": false,
+	"name": "Brock",
+	"nickname": "",
+	"nickname_bool": false,
+	"offset_x": 40,
+	"offset_y": 0,
+	"portraits": [
+		{
+			"name": "Default",
+			"path": "res://Sprites/brock.png"
+		}
+	],
+	"scale": 128
+}
