@@ -8,16 +8,21 @@ func _ready():
 # the above makes it so you can use keyboard and mouse for menu
 
 func _on_Start_pressed():
+	# New Game starts fresh in memory only: an existing save is left untouched until the player saves
+	Global.reset_for_new_game()
 	van.visible = false
 	van2.visible = true
 	van2.play("off screen")
 
 func _on_Controls_pressed():
-	if(Load.can_click):
-		van.visible = false
-		van2.visible = true
-		van2.play("off screen")
-		Global.do_load()
+	# Continue
+	var result = Global.load_game()
+	if not result["ok"]:
+		Global.show_toast(result["reason"], false)
+		return
+	van.visible = false
+	van2.visible = true
+	van2.play("off screen")
 
 func _on_Quit_pressed():
 	get_tree().quit()

@@ -15,5 +15,4 @@ func _on_ResumeBtn_pressed():
 	self.is_paused = false
 	
 func _on_QuitBtn_pressed():
-	Global.do_save()
 	get_tree().quit()

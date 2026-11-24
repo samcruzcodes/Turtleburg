@@ -1,4 +1,4 @@
-[gd_scene load_steps=94 format=2]
+[gd_scene load_steps=95 format=2]
 
 [ext_resource path="res://Scenes/Player.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Tileset/interior.png" type="Texture" id=2]
@@ -9,7 +9,8 @@
 [ext_resource path="res://Scripts/bartender.gd" type="Script" id=7]
 [ext_resource path="res://Scripts/jodi.gd" type="Script" id=8]
 [ext_resource path="res://Scripts/gabe.gd" type="Script" id=9]
-[ext_resource path="res://scripts/kate.gd" type="Script" id=10]
+[ext_resource path="res://Scripts/kate.gd" type="Script" id=10]
+[ext_resource path="res://Scripts/interior_layering.gd" type="Script" id=900]
 
 [sub_resource type="ConvexPolygonShape2D" id=81]
 points = PoolVector2Array( 16, 32, 0, 32, 0, 9.3982, 16, 9.3982 )
@@ -1683,3 +1684,6 @@ position = Vector2( 66, 83.5 )
 shape = SubResource( 88 )
 
 [node name="GUI" parent="." instance=ExtResource( 4 )]
+
+[node name="Layering" type="Node" parent="."]
+script = ExtResource( 900 )

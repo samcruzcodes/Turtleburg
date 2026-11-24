@@ -20,7 +20,7 @@
 [ext_resource path="res://Sprites/interact.png" type="Texture" id=18]
 [ext_resource path="res://Scripts/stevenhouse.gd" type="Script" id=19]
 [ext_resource path="res://Sprites/trash.png" type="Texture" id=20]
-[ext_resource path="res://scripts/pollution.gd" type="Script" id=21]
+[ext_resource path="res://Scripts/pollution.gd" type="Script" id=21]
 [ext_resource path="res://Sprites/sticky note-export.png" type="Texture" id=22]
 [ext_resource path="res://Sprites/arrow.png" type="Texture" id=23]
 [ext_resource path="res://Sprites/sticky note-export-export2.png" type="Texture" id=24]

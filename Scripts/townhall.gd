@@ -4,7 +4,7 @@ var dialog_index = Global.indices["town"]
 var town = "towncenter"
 
 func _ready():
-	Global.do_save()
+	Global.begin_visit(Global.TOWNHALL_SCENE)
 	if dialog_index > 1:
 		dialog_index = 1
 	var new_dialog = Dialogic.start(town + str(dialog_index))

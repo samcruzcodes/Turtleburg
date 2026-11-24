@@ -2,7 +2,7 @@ extends Node2D
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	Global.do_save()
+	Global.begin_visit(Global.JAYSON_HOME_SCENE)
 	var new_dialog = Dialogic.start('jaysonhouse')
 	new_dialog.pause_mode = PAUSE_MODE_PROCESS
 	add_child(new_dialog)

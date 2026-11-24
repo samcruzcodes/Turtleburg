@@ -11,3 +11,10 @@ export_credentials.cfg
 .mono/ 
 data_*/ 
 mono_crash.*.json
+# build output and local test hooks
+build/
+override.cfg
+_playtest/
+shots/
+dist/
+tests/results/

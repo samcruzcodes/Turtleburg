@@ -10,5 +10,4 @@ func _on_AnimatedSprite_animation_finished():
 		the_end.visible = true
 
 func _on_Button_pressed():
-	Global.do_save()
 	get_tree().quit()

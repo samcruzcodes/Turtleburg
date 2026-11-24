@@ -26,7 +26,7 @@ func start_leave_request_dialog():
 		dialog.connect("timeline_end", self, "end_dialog")
 		get_tree().paused = true
 		
-	elif Global.indices["trash"] < 5:
+	elif Global.indices["pollution"] < 6:
 		var dialog = Dialogic.start("pollution")
 		dialog.pause_mode = PAUSE_MODE_PROCESS
 		get_parent().add_child(dialog)

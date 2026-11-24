@@ -1,26 +1,9 @@
 extends Button
+# Used both as the "Load" autoload (a plain holder) and as the menu's Continue button.
 
 var can_click = false
 
 func _ready():
-	connect_signals()
-	
-	var file: File = File.new()
-	if(file.file_exists(Global.save_path)):
-		can_click = true
-		Load.visible = true
-		pass
-	else:
-		Load.visible = false
-
-func set_font_color(col : Color):
-	set("custom_colors/font_color",col)
-	set("custom_colors/font_color_hover",col)
-	set("custom_colors/font_color_pressed",col)
-
-func connect_signals():
-	connect("mouse_entered",self,"_on_Button_mouse_entered")
-	connect("pressed",self,"_on_Button_Pressed")
-	
-func _on_HowToPlay_pressed():
-	pass
+	can_click = Global.has_save()
+	# only the menu's Continue button is ever shown; the autoload instance stays hidden
+	visible = can_click and get_parent() != get_tree().root

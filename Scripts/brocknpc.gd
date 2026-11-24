@@ -41,7 +41,7 @@ func start_dialog():
 		Dialogic.set_variable(npc +str("_likeability"), 0)
 		dialog.connect("timeline_end", self, "end_dialog")
 		get_tree().paused = true
-		Global.increment_index("jayson")
+		Global.increment_index("brock")
 	
 func end_dialog(_data):
 	get_tree().paused = false

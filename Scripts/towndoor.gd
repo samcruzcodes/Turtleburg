@@ -5,6 +5,7 @@ func _ready():
 	add_to_group("DOOR")
 
 func start_door_request_dialog():
+	Global.note_door_use(self)
 	var dialog = Dialogic.start(door)
 	dialog.pause_mode = PAUSE_MODE_PROCESS
 	get_parent().add_child(dialog)

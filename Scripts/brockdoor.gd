@@ -6,6 +6,7 @@ func _ready():
 	add_to_group("DOOR")
 	
 func start_door_request_dialog():
+	Global.note_door_use(self)
 	if Global.indices["brockhouse"] > 1:
 		var dialog = Dialogic.start("done")
 		dialog.pause_mode = PAUSE_MODE_PROCESS
@@ -20,7 +21,7 @@ func start_door_request_dialog():
 		dialog.connect("timeline_end", self, "end_dialog")
 		get_tree().paused = true
 		
-	elif Global.indices["town"] == 1:
+	elif Global.indices["town"] >= 1:
 		var dialog = Dialogic.start("brockdontknow")
 		dialog.pause_mode = PAUSE_MODE_PROCESS
 		get_parent().add_child(dialog)
