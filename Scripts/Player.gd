@@ -190,7 +190,7 @@ func update_interaction():
 	var target = find_interact_target() if Global.moving == true else null
 	cue_target = target
 	if markers != null:
-		markers.update(target if target != null and markers.is_usable(target) else null)
+		markers.update(target if target != null and markers.is_usable(target) else null, target)
 		cue = markers.sprite_of(target) if target != null else null
 	if target != null and Input.is_action_just_pressed("interact") and Global.interact_allowed():
 		activate_target(target)

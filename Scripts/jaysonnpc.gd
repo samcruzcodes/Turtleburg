@@ -9,6 +9,9 @@ var gravity = 0.3
 
 func _ready(): 
 	add_to_group("NPC")
+	# The path moves this body; it must not collide with (and so drag along) the player. The layer stays
+	# 1 so the player's interaction range still finds this NPC.
+	collision_mask = 0
 
 func start_dialog():
 	

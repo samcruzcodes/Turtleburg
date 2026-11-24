@@ -140,41 +140,41 @@ func _toggle_map():
 ###################################
 
 func _on_towndoor_mouse_entered():
-	$towndoor/TextureRect.visible = true
+	pass     # the location label (interaction_markers.gd) now follows the mouse and the player
 func _on_towndoor_input_event(viewport, event, shape_idx):
 	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT:
 		$towndoor.start_door_request_dialog()
 func _on_towndoor_mouse_exited():
-	$towndoor/TextureRect.visible = false
+	pass     # the location label (interaction_markers.gd) now follows the mouse and the player
 
 
 
 func _on_stevendoor_mouse_entered():
-	$stevendoor/TextureRect.visible = true
+	pass     # the location label (interaction_markers.gd) now follows the mouse and the player
 func _on_stevendoor_input_event(viewport, event, shape_idx):
 	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT:
 		$stevendoor.start_door_request_dialog()
 func _on_stevendoor_mouse_exited():
-	$stevendoor/TextureRect.visible = false
+	pass     # the location label (interaction_markers.gd) now follows the mouse and the player
 
 
 
 func _on_jaysondoor_mouse_entered():
-	$jaysondoor/TextureRect.visible = true
+	pass     # the location label (interaction_markers.gd) now follows the mouse and the player
 func _on_jaysondoor_input_event(viewport, event, shape_idx):
 	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT:
 		$jaysondoor.start_door_request_dialog()
 func _on_jaysondoor_mouse_exited():
-	$jaysondoor/TextureRect.visible = false
+	pass     # the location label (interaction_markers.gd) now follows the mouse and the player
 
 
 func _on_brockdoor_mouse_entered():
-	$brockdoor/TextureRect.visible = true
+	pass     # the location label (interaction_markers.gd) now follows the mouse and the player
 func _on_brockdoor_input_event(viewport, event, shape_idx):
 	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT:
 		$brockdoor.start_door_request_dialog()
 func _on_brockdoor_mouse_exited():
-	$brockdoor/TextureRect.visible = false
+	pass     # the location label (interaction_markers.gd) now follows the mouse and the player
 
 
 ###################################

@@ -2,15 +2,27 @@ extends Node2D
 # Active quest markers drawn ON the map artwork (child of the map node, so they scale, move and stay
 # aligned with the art whenever the window or camera changes, and they draw above the map blur).
 #
-# One yellow "!" (the game's existing Sprites/interact.png icon) per location that an ACTIVE journal
+# One small green pin per location that an ACTIVE journal
 # step points at - the same steps as the Q journal. Nothing shows before Kate's introduction, and
 # completed or still-locked steps show nothing.
 #
 # World -> map: the map is a scaled copy of the world's tile layers, so a world point is carried over
 # through the shared tile coordinates of the "base" layer in both.
-const TEXTURE = "res://Sprites/interact.png"
-const MARKER_SCALE = 0.8
-const LIFT = 30.0               # screen px above the spot, so the icon sits over the art, not on it
+# A small green map pin (pixel art, drawn here so it needs no new asset): it matches the sticky-note
+# green of the location labels and is much quieter than the old yellow "!".
+const PIN = [
+	"..OOOOO..",
+	".OGGGGGO.",
+	"OGGWWGGGO",
+	"OGGWGGGGO",
+	"OGGGGGGGO",
+	".OGGGGGO.",
+	"..OGGGO..",
+	"...OGO...",
+	"....O....",
+]
+const MARKER_SCALE = 1.6
+const LIFT = 3.0                # screen px above the spot: the pin's tip rests on the location
 const WORLD_TILEMAP = "baseNode/base"
 const MAP_TILEMAP = "TextureRect/baseNode/base"
 
@@ -24,7 +36,27 @@ var last_dests = []             # for tests: [{"key", "dest", "map_pos"}]
 func setup(world_node):
 	world = world_node
 	map = get_parent()
-	texture = load(TEXTURE)
+	texture = _pin_texture()
+
+func _pin_texture():
+	var img = Image.new()
+	img.create(9, 9, false, Image.FORMAT_RGBA8)
+	img.lock()
+	for y in range(9):
+		for x in range(9):
+			var ch = PIN[y][x]
+			var col = Color(0, 0, 0, 0)
+			if ch == "O":
+				col = Color(0.06, 0.32, 0.14, 1)
+			elif ch == "G":
+				col = Color(0.35, 0.92, 0.45, 1)
+			elif ch == "W":
+				col = Color(0.85, 1.0, 0.88, 1)
+			img.set_pixel(x, y, col)
+	img.unlock()
+	var t = ImageTexture.new()
+	t.create_from_image(img, 0)           # flags 0: no filtering, the pixels stay sharp
+	return t
 
 func _process(delta):
 	if world == null or map == null or not map.visible:
@@ -62,11 +94,14 @@ func _process(delta):
 			var s = Sprite.new()
 			s.name = "QuestMarker"
 			s.texture = texture
+			s.centered = false
+			s.offset = Vector2(-4.5, -9.0)      # the pin's tip is the sprite's origin
 			s.scale = Vector2(MARKER_SCALE, MARKER_SCALE)
+			s.modulate = Color(1, 1, 1, 0.92)
 			add_child(s)
 			sprites[key] = s
 		var sp = sprites[key]
-		sp.global_position = wanted[key] + Vector2(0, -LIFT + sin(time * 4.0) * 2.0)
+		sp.global_position = wanted[key] + Vector2(0, -LIFT + sin(time * 3.0) * 1.5)
 		sp.visible = true
 
 # Where, in the world, a step happens (null if it cannot be found right now)
