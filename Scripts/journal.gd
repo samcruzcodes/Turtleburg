@@ -42,15 +42,15 @@ func entries(ind, scene_path):
 	out.append({"text": "Talk to Jayson", "done": jay_talk})
 	if jay_talk:
 		out.append({"text": "Visit Jayson's house", "done": jay_n >= 1 or scene_path == Global.JAYSON_HOME_SCENE})
-		out.append({"text": "Fix Jayson's toilet and bathtub (%d/%d)" % [min(jay_n, jay_target), jay_target], "done": jay_n >= jay_target, "sub": true})
+		out.append({"text": "Fix Jayson's toilet and bathtub (%d of %d)" % [min(jay_n, jay_target), jay_target], "done": jay_n >= jay_target, "sub": true})
 	out.append({"text": "Talk to Brock", "done": brock_talk})
 	if brock_talk:
 		out.append({"text": "Visit Brock's house", "done": brock_n >= 1 or scene_path == Global.BROCK_HOME_SCENE})
-		out.append({"text": "Clean up Brock's house (%d/%d)" % [min(brock_n, brock_target), brock_target], "done": brock_n >= brock_target, "sub": true})
-	out.append({"text": "Talk to Steven (%d/%d, optional)" % [min(steven_n, STEVEN_TALKS), STEVEN_TALKS], "done": steven_n >= STEVEN_TALKS})
+		out.append({"text": "Clean up Brock's house (%d of %d)" % [min(brock_n, brock_target), brock_target], "done": brock_n >= brock_target, "sub": true})
+	out.append({"text": "Talk to Steven (%d of %d, optional)" % [min(steven_n, STEVEN_TALKS), STEVEN_TALKS], "done": steven_n >= STEVEN_TALKS})
 	var cleanup_open = (jay_n >= 1 and brock_n >= 1 and steven_n >= STEVEN_TALKS) or trash_n > 0
 	if cleanup_open:
-		out.append({"text": "Pick up litter on the beach (%d/%d)" % [min(trash_n, TRASH_TARGET), TRASH_TARGET], "done": trash_n >= TRASH_TARGET})
+		out.append({"text": "Pick up litter on the beach (%d of %d)" % [min(trash_n, TRASH_TARGET), TRASH_TARGET], "done": trash_n >= TRASH_TARGET})
 	if trash_n >= TRASH_TARGET and jay_n >= 2 and brock_n >= 2:
 		out.append({"text": "Head to the pier at the tip of the beach", "done": false})
 	return out
@@ -72,6 +72,19 @@ func _eligible_scene():
 
 func unlocked():
 	return int(Global.indices.get("town", 0)) >= TOWN_HALL_FIRST_LINE
+
+# Why Q does nothing right now ("" = it can open). Conversations, pause and the map stay silent; the
+# other reasons get a short toast so a blocked press is never a mystery.
+func _block_reason():
+	if not _eligible_scene() or get_tree().paused or Global._dialogue_active():
+		return "silent"
+	if not unlocked():
+		return "Quests unlock after the town hall introduction"
+	if Global.moving != true:
+		return "silent"
+	if OS.get_ticks_msec() - Global._scene_changed_at <= 300:
+		return "silent"
+	return ""
 
 func _can_open():
 	return unlocked() and _eligible_scene() and Global.moving == true and not get_tree().paused and not Global._dialogue_active() and OS.get_ticks_msec() - Global._scene_changed_at > 300
@@ -138,7 +151,10 @@ func _build_panel():
 	_pin_box.pressed = false
 	_pin_box.connect("toggled", self, "_on_pin_toggled")
 	box.add_child(_pin_box)
-	box.add_child(_label("Press Q to close", Color(0.7, 0.8, 0.75)))
+	var hint = Label.new()                      # default font: the pixel font draws Q like O
+	hint.text = "Press Q again to close"
+	hint.add_color_override("font_color", Color(0.7, 0.8, 0.75))
+	box.add_child(hint)
 
 func _build_tracker():
 	_tracker = PanelContainer.new()
@@ -183,7 +199,14 @@ func _scene_path():
 
 # ------------------------------------------------------------------ open / close / show
 func open():
-	if is_open or not _can_open():
+	if is_open:
+		return
+	var why = _block_reason()
+	if why != "":
+		if why != "silent":
+			Global.show_toast(why, false)
+		return
+	if not _can_open():
 		return
 	is_open = true
 	_refresh()

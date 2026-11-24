@@ -180,6 +180,7 @@ func _current_scene_path():
 
 var _was_paused = false
 var _unpaused_at = -100000
+var map_closed_at = -100000      # when the map last closed (see interact_allowed)
 var journal = null
 
 func _process(_delta):
@@ -198,7 +199,7 @@ func interact_allowed():
 	var now = OS.get_ticks_msec()
 	# also ignore a quick second tap right after a conversation closes (players skip text by tapping
 	# Space / Enter / E, and the last tap must not immediately talk to the same person again)
-	return not _was_paused and now - _scene_changed_at > 300 and now - _unpaused_at > 250
+	return not _was_paused and now - _scene_changed_at > 300 and now - _unpaused_at > 250 and now - map_closed_at > 250
 
 func _build_toast():
 	_toast_layer = CanvasLayer.new()
@@ -248,7 +249,8 @@ func _dialogue_active():
 
 func _find_dialog(node):
 	var s = node.get_script()
-	if s != null and str(s.resource_path).ends_with("DialogNode.gd"):
+	# exported builds load compiled scripts (.gdc), so match the name, not the extension
+	if s != null and str(s.resource_path).get_file().begins_with("DialogNode."):
 		return node
 	for c in node.get_children():
 		var r = _find_dialog(c)

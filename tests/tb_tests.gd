@@ -1534,6 +1534,158 @@ func test_release_b():
 	CHECK(back, "Enter on the highlighted exit left the house")
 	finish()
 
+
+# ------------------------------------------------------------------ Q after Kate's introduction (human pace)
+func qdiag(label):
+	var cs = get_tree().current_scene
+	L("%s: unlocked=%s open=%s paused=%s moving=%s dialogue_active=%s dialog_node=%s scene_age_ms=%d scene=%s" % [label, str(Global.journal.unlocked()), str(Global.journal.is_open), str(get_tree().paused), str(Global.moving), str(Global._dialogue_active()), str(dialog_node() != null), OS.get_ticks_msec() - Global._scene_changed_at, str(cs.filename) if cs != null else "?"])
+
+# Press Space at a human pace until the conversation has closed; picks the first answer when asked.
+func human_pump(timeout = 200.0):
+	var start = t
+	while t - start < timeout:
+		var d = dialog_node()
+		if d == null or not get_tree().paused:
+			return true
+		var bc = d.button_container
+		if d.waiting_for_answer and bc != null and bc.get_child_count() > 0:
+			yield(get_tree().create_timer(1.3, true), "timeout")
+			bc = d.button_container
+			if bc != null and bc.get_child_count() > 0:
+				var texts = []
+				for b in bc.get_children():
+					texts.append(b.text)
+				bc.get_child(choose(texts)).emit_signal("pressed")
+				yield(get_tree().create_timer(0.4, true), "timeout")
+		else:
+			var tp = tap(KEY_SPACE, 0.06)
+			yield(get_tree().create_timer(0.35, true), "timeout")
+	return false
+
+func test_q_intro():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	var door = world_door("towndoor")
+	var r0 = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r0 is GDScriptFunctionState:
+		r0 = yield(r0, "completed")
+	var tc = tap(KEY_SPACE, 0.1)
+	if tc is GDScriptFunctionState:
+		yield(tc, "completed")
+	var pp = pump("enter_towndoor", 150)
+	if pp is GDScriptFunctionState:
+		yield(pp, "completed")
+	var in_ = wait_scene("res://Scenes/townhall.tscn", 25)
+	if in_ is GDScriptFunctionState:
+		in_ = yield(in_, "completed")
+	CHECK(in_, "entered the town hall")
+	player = root().find_node("Player", true, false)
+	var hp = human_pump(260.0)
+	if hp is GDScriptFunctionState:
+		hp = yield(hp, "completed")
+	CHECK(hp, "Kate's whole introduction was played through at human pace")
+	yield(get_tree().create_timer(0.15, true), "timeout")
+	qdiag("right after the intro closed")
+	var q1 = tap(KEY_Q, 0.08)
+	if q1 is GDScriptFunctionState:
+		yield(q1, "completed")
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	qdiag("after the first Q")
+	CHECK(Global.journal.is_open, "the very next Q opens the journal")
+	var shj = shot("journal_open")
+	if shj is GDScriptFunctionState:
+		yield(shj, "completed")
+	L("journal panel visible=%s tracker visible=%s root rect=%s" % [str(Global.journal._panel_root.visible), str(Global.journal._tracker.visible), str(Global.journal._panel_root.get_global_rect())])
+	var q2 = tap(KEY_Q, 0.08)
+	if q2 is GDScriptFunctionState:
+		yield(q2, "completed")
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	CHECK(not Global.journal.is_open and not get_tree().paused, "another Q closes it")
+	CHECK(not Global.journal.pinned, "tracker is off by default")
+	Global.journal.pinned = true
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	var sht = shot("tracker_pinned")
+	if sht is GDScriptFunctionState:
+		yield(sht, "completed")
+	finish()
+
+
+# ------------------------------------------------------------------ practice-copy check: map close keys + Q after Kate's intro
+func map_cycle_close(label, close_key, board, pm, npc):
+	var tk = tap(KEY_SPACE, 0.1)
+	if tk is GDScriptFunctionState:
+		yield(tk, "completed")
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	CHECK(not Global.isVisible and Global.moving == false, "%s: the board opened the map" % label)
+	var p0 = player.global_position
+	var n0 = npc.global_position
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	CHECK((player.global_position - p0).length() < 0.5, "%s: the player stays still while the map is open" % label)
+	CHECK((npc.global_position - n0).length() > 10.0, "%s: the world keeps moving behind the map (%s moved %d px)" % [label, str(npc.name), int((npc.global_position - n0).length())])
+	var tc = tap(close_key, 0.1)
+	if tc is GDScriptFunctionState:
+		yield(tc, "completed")
+	yield(get_tree().create_timer(0.7, true), "timeout")
+	CHECK(Global.isVisible and Global.moving == true, "%s: the map closed" % label)
+	CHECK(not pm.is_paused and not get_tree().paused and dialog_node() == null, "%s: that press did not open Pause, a dialogue or anything else" % label)
+	yield(get_tree().create_timer(0.9, true), "timeout")
+	CHECK(Global.isVisible and not get_tree().paused, "%s: the same press did not reopen the map" % label)
+
+func test_practice_check():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	var board = by_script("mapboard.gd")[0]
+	var br = rect_of_area(board)
+	var pm = by_script("PauseMenu.gd")[0]
+	var npc = by_script("stevennpc.gd")[0]
+	teleport_feet(Vector2(br.position.x + br.size.x * 0.5, br.position.y - 8.0))
+	yield(get_tree().create_timer(0.7, true), "timeout")
+	CHECK(player.cue_target == board and bright(board), "board: bright ! and it is the target when near")
+	var e1 = map_cycle_close("Esc", KEY_ESCAPE, board, pm, npc)
+	if e1 is GDScriptFunctionState:
+		yield(e1, "completed")
+	var e2 = map_cycle_close("Enter", KEY_ENTER, board, pm, npc)
+	if e2 is GDScriptFunctionState:
+		yield(e2, "completed")
+	var e3 = map_cycle_close("E", KEY_E, board, pm, npc)
+	if e3 is GDScriptFunctionState:
+		yield(e3, "completed")
+	# Kate's introduction, then Q
+	var door = world_door("towndoor")
+	var r0 = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r0 is GDScriptFunctionState:
+		r0 = yield(r0, "completed")
+	var tc = tap(KEY_SPACE, 0.1)
+	if tc is GDScriptFunctionState:
+		yield(tc, "completed")
+	var pp = pump("enter_towndoor", 150)
+	if pp is GDScriptFunctionState:
+		yield(pp, "completed")
+	var in_ = wait_scene("res://Scenes/townhall.tscn", 25)
+	if in_ is GDScriptFunctionState:
+		in_ = yield(in_, "completed")
+	CHECK(in_, "entered the town hall")
+	player = root().find_node("Player", true, false)
+	var hp = human_pump(260.0)
+	if hp is GDScriptFunctionState:
+		hp = yield(hp, "completed")
+	CHECK(hp, "Kate's whole introduction was played through at human pace")
+	yield(get_tree().create_timer(0.15, true), "timeout")
+	var q1 = tap(KEY_Q, 0.08)
+	if q1 is GDScriptFunctionState:
+		yield(q1, "completed")
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	CHECK(Global.journal.is_open, "the very next Q opens the journal")
+	var q2 = tap(KEY_Q, 0.08)
+	if q2 is GDScriptFunctionState:
+		yield(q2, "completed")
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	CHECK(not Global.journal.is_open and not get_tree().paused, "another Q closes it")
+	CHECK(not Global.journal.pinned, "tracker is off by default")
+	finish()
+
 func test_saves_unit():
 	for p in ["user://saves/save.dat", "user://saves/save.dat.bak", "user://saves/save.dat.tmp"]:
 		rm(p)
@@ -2164,6 +2316,10 @@ func main():
 	var r = null
 	if which == "doors":
 		r = test_doors()
+	elif which == "practice_check":
+		r = test_practice_check()
+	elif which == "q_intro":
+		r = test_q_intro()
 	elif which == "release_a":
 		r = test_release_a()
 	elif which == "release_b":

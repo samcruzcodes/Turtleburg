@@ -45,7 +45,16 @@ func end_dialog(_data):
 	$direct.visible = true
 
 func _input(event):
-	if event is InputEventKey and event.pressed and event.scancode == KEY_M:
+	if not (event is InputEventKey) or not event.pressed or event.is_echo():
+		return
+	if Global.isVisible == false:
+		# map open: M, Esc and every Interact key (Space, Enter, keypad Enter, E) close it. The press is
+		# consumed here, so it cannot also open Pause (handled in _unhandled_input), and Global's
+		# interact guard stops the same press from talking to someone or entering a door afterwards.
+		if event.scancode == KEY_M or event.is_action_pressed("pause") or event.is_action_pressed("interact"):
+			_toggle_map()
+			get_tree().set_input_as_handled()
+	elif event.scancode == KEY_M:
 		_toggle_map()
 
 # Opens the map if it is closed (used by the notice board). Closing stays on M, as before.
@@ -67,6 +76,7 @@ func _toggle_map():
 		$brockdoor.visible = false
 	else:
 		Global.moving = true
+		Global.map_closed_at = OS.get_ticks_msec()
 		$Player/Camera2D2/minimap.visible = false
 		map_blur.visible = false
 		$"top exteriors/exteriorTop".visible = true
