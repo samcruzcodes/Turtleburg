@@ -12,6 +12,7 @@ func _ready():
 	Global.isVisible = true
 	_place_player()
 	_setup_map_blur()
+	_setup_map_quest_markers()
 	_first_time()
 	Global.connect("left_town", self, "_on_left_town")
 	
@@ -275,3 +276,16 @@ func _place_player():
 		Global.continue_pending = false
 		if Global.has_saved_position:
 			player.global_position = Global.player_position
+
+
+###################################
+# Quest markers on the map
+###################################
+
+var map_quest_markers = null
+
+func _setup_map_quest_markers():
+	map_quest_markers = load("res://Scripts/map_quest_markers.gd").new()
+	map_quest_markers.name = "QuestMarkers"
+	$Player/Camera2D2/minimap.add_child(map_quest_markers)
+	map_quest_markers.setup(self)

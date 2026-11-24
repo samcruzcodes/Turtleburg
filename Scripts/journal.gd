@@ -39,20 +39,21 @@ func entries(ind, scene_path):
 	var brock_target = Global.BROCK_CLEANUP_TARGET
 	var steven_n = int(ind.get("steven", 0))
 	var trash_n = int(ind.get("pollution", 0))
-	out.append({"text": "Talk to Jayson", "done": jay_talk})
+	# "dest" tells the map where each step happens (see map_quest_markers.gd)
+	out.append({"text": "Talk to Jayson", "done": jay_talk, "dest": "npc:jayson"})
 	if jay_talk:
-		out.append({"text": "Visit Jayson's house", "done": jay_n >= 1 or scene_path == Global.JAYSON_HOME_SCENE})
-		out.append({"text": "Fix Jayson's toilet and bathtub (%d of %d)" % [min(jay_n, jay_target), jay_target], "done": jay_n >= jay_target, "sub": true})
-	out.append({"text": "Talk to Brock", "done": brock_talk})
+		out.append({"text": "Visit Jayson's house", "done": jay_n >= 1 or scene_path == Global.JAYSON_HOME_SCENE, "dest": "door:jaysondoor"})
+		out.append({"text": "Fix Jayson's toilet and bathtub (%d of %d)" % [min(jay_n, jay_target), jay_target], "done": jay_n >= jay_target, "sub": true, "dest": "door:jaysondoor"})
+	out.append({"text": "Talk to Brock", "done": brock_talk, "dest": "npc:brock"})
 	if brock_talk:
-		out.append({"text": "Visit Brock's house", "done": brock_n >= 1 or scene_path == Global.BROCK_HOME_SCENE})
-		out.append({"text": "Clean up Brock's house (%d of %d)" % [min(brock_n, brock_target), brock_target], "done": brock_n >= brock_target, "sub": true})
-	out.append({"text": "Talk to Steven (%d of %d, optional)" % [min(steven_n, STEVEN_TALKS), STEVEN_TALKS], "done": steven_n >= STEVEN_TALKS})
+		out.append({"text": "Visit Brock's house", "done": brock_n >= 1 or scene_path == Global.BROCK_HOME_SCENE, "dest": "door:brockdoor"})
+		out.append({"text": "Clean up Brock's house (%d of %d)" % [min(brock_n, brock_target), brock_target], "done": brock_n >= brock_target, "sub": true, "dest": "door:brockdoor"})
+	out.append({"text": "Talk to Steven (%d of %d, optional)" % [min(steven_n, STEVEN_TALKS), STEVEN_TALKS], "done": steven_n >= STEVEN_TALKS, "dest": "npc:steven"})
 	var cleanup_open = (jay_n >= 1 and brock_n >= 1 and steven_n >= STEVEN_TALKS) or trash_n > 0
 	if cleanup_open:
-		out.append({"text": "Pick up litter on the beach (%d of %d)" % [min(trash_n, TRASH_TARGET), TRASH_TARGET], "done": trash_n >= TRASH_TARGET})
+		out.append({"text": "Pick up litter on the beach (%d of %d)" % [min(trash_n, TRASH_TARGET), TRASH_TARGET], "done": trash_n >= TRASH_TARGET, "dest": "trash"})
 	if trash_n >= TRASH_TARGET and jay_n >= 2 and brock_n >= 2:
-		out.append({"text": "Head to the pier at the tip of the beach", "done": false})
+		out.append({"text": "Head to the pier at the tip of the beach", "done": false, "dest": "pier"})
 	return out
 
 func active(list):

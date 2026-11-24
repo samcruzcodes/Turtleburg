@@ -1686,6 +1686,137 @@ func test_practice_check():
 	CHECK(not Global.journal.pinned, "tracker is off by default")
 	finish()
 
+
+# ------------------------------------------------------------------ quest markers on the map
+func quest_markers():
+	var qm = root().find_node("QuestMarkers", true, false)
+	var out = {}
+	if qm != null:
+		for k in qm.sprites.keys():
+			if qm.sprites[k].visible:
+				out[k] = qm.sprites[k]
+	return out
+
+func marker_keys():
+	var k = quest_markers().keys()
+	k.sort()
+	return str(k)
+
+func open_map_and_wait():
+	var tm = tap(KEY_M, 0.1)
+	if tm is GDScriptFunctionState:
+		yield(tm, "completed")
+	yield(get_tree().create_timer(0.7, true), "timeout")
+
+func test_map_quests():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	# --- before Kate's introduction
+	var o1 = open_map_and_wait()
+	if o1 is GDScriptFunctionState:
+		yield(o1, "completed")
+	CHECK(not Global.isVisible and root().find_node("QuestMarkers", true, false) != null, "the map is open and the marker layer exists")
+	CHECK(quest_markers().size() == 0, "no quest markers before Kate's introduction (%s)" % marker_keys())
+	var s1 = shot("map_before_intro")
+	if s1 is GDScriptFunctionState:
+		yield(s1, "completed")
+	var c1 = open_map_and_wait()
+	if c1 is GDScriptFunctionState:
+		yield(c1, "completed")
+	# --- the real introduction
+	var door = world_door("towndoor")
+	var r0 = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r0 is GDScriptFunctionState:
+		r0 = yield(r0, "completed")
+	var tc = tap(KEY_SPACE, 0.1)
+	if tc is GDScriptFunctionState:
+		yield(tc, "completed")
+	var pp = pump("enter_towndoor", 150)
+	if pp is GDScriptFunctionState:
+		yield(pp, "completed")
+	var in_ = wait_scene("res://Scenes/townhall.tscn", 25)
+	if in_ is GDScriptFunctionState:
+		in_ = yield(in_, "completed")
+	CHECK(in_, "entered the town hall")
+	player = root().find_node("Player", true, false)
+	var hp = human_pump(260.0)
+	if hp is GDScriptFunctionState:
+		hp = yield(hp, "completed")
+	CHECK(hp and Global.journal.unlocked(), "Kate's introduction finished and the journal is unlocked")
+	var lv = leave_by_exit("exit.gd")
+	if lv is GDScriptFunctionState:
+		yield(lv, "completed")
+	var back = wait_scene("res://Scenes/World.tscn", 25)
+	if back is GDScriptFunctionState:
+		back = yield(back, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(1.0, true), "timeout")
+	# --- right after the introduction: where to find the three people
+	var o2 = open_map_and_wait()
+	if o2 is GDScriptFunctionState:
+		yield(o2, "completed")
+	var qm = root().find_node("QuestMarkers", true, false)
+	L("after the intro: %s" % marker_keys())
+	CHECK(marker_keys() == str(["npc:brock", "npc:jayson", "npc:steven"]), "after the intro: one ! each for Jayson, Brock and Steven (%s)" % marker_keys())
+	var mk = quest_markers()
+	if mk.size() == 3:
+		CHECK(mk["npc:brock"].global_position.x < mk["npc:jayson"].global_position.x, "Brock (west) is left of Jayson (east) on the map")
+	for k in mk.keys():
+		var sp = mk[k]
+		var nm = k.get_slice(":", 1)
+		var npc = null
+		for n in get_tree().get_nodes_in_group("NPC"):
+			if str(n.npc) == nm:
+				npc = n
+		L("%s: marker at %s, map point of the person %s" % [k, str(sp.global_position), str(qm._to_map(npc.global_position))])
+	var map = qm.get_parent()
+	var holder = root().find_node("MapBlurLayer", true, false)
+	CHECK(map.z_index >= 100 and not map.z_as_relative and holder != null and holder.z_index == 90, "markers draw above the blur (map z %d, blur z %d)" % [map.z_index, holder.z_index if holder != null else -1])
+	var s2 = shot("map_after_intro")
+	if s2 is GDScriptFunctionState:
+		yield(s2, "completed")
+	# --- next step unlocks: Jayson's house replaces Jayson
+	Global.indices["jayson"] = 1
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	CHECK(marker_keys() == str(["door:jaysondoor", "npc:brock", "npc:steven"]), "after talking to Jayson his marker moves to his house (%s)" % marker_keys())
+	var s3 = shot("map_after_jayson")
+	if s3 is GDScriptFunctionState:
+		yield(s3, "completed")
+	Global.indices["brock"] = 1
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	CHECK(marker_keys() == str(["door:brockdoor", "door:jaysondoor", "npc:steven"]), "same for Brock (%s)" % marker_keys())
+	Global.indices["jayhouse"] = 2               # Jayson's task done
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	CHECK(marker_keys() == str(["door:brockdoor", "npc:steven"]), "a completed step loses its marker (%s)" % marker_keys())
+	Global.indices["brockhouse"] = 4
+	Global.indices["steven"] = 3
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	CHECK(marker_keys() == str(["trash"]), "only the beach is left once the houses and Steven are done (%s)" % marker_keys())
+	var s4 = shot("map_beach")
+	if s4 is GDScriptFunctionState:
+		yield(s4, "completed")
+	Global.indices["pollution"] = 6
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	CHECK(marker_keys() == str(["pier"]), "the pier is marked once the litter is done (%s)" % marker_keys())
+	# --- resize: markers stay on the art
+	var before = quest_markers()["pier"].global_position
+	OS.window_size = Vector2(900, 640)
+	yield(get_tree().create_timer(1.0, true), "timeout")
+	var after = quest_markers()["pier"].global_position
+	L("pier marker before/after resize: %s %s" % [str(before), str(after)])
+	CHECK(abs(after.x - before.x) < 3.0 and abs(after.y - before.y) < 6.0, "markers stay put on the map art when the window resizes")
+	var s5 = shot("map_resized")
+	if s5 is GDScriptFunctionState:
+		yield(s5, "completed")
+	# the map closes as before
+	var c2 = tap(KEY_ESCAPE, 0.1)
+	if c2 is GDScriptFunctionState:
+		yield(c2, "completed")
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	CHECK(Global.isVisible and quest_markers().size() >= 0, "Esc still closes the map")
+	finish()
+
 func test_saves_unit():
 	for p in ["user://saves/save.dat", "user://saves/save.dat.bak", "user://saves/save.dat.tmp"]:
 		rm(p)
@@ -2316,6 +2447,8 @@ func main():
 	var r = null
 	if which == "doors":
 		r = test_doors()
+	elif which == "map_quests":
+		r = test_map_quests()
 	elif which == "practice_check":
 		r = test_practice_check()
 	elif which == "q_intro":
