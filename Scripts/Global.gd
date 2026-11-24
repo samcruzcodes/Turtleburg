@@ -88,7 +88,25 @@ func increment_index(idx):
 
 # ------------------------------------------------------------------ new game / state
 
+# ------------------------------------------------------------------ repeat dialogue
+# Which short repeat line an NPC says next. Session-only (never saved, never touches quest state):
+# the lines rotate in order, so the same line is never said twice in a row; when `sig` changes
+# (the NPC's mission state moved on) the rotation starts again from its first line.
+var repeat_state = {}
+var last_repeat_timeline = ""   # for tests
+
+func repeat_timeline(key, lines, sig = ""):
+	var st = repeat_state.get(key, {"sig": sig, "next": 0})
+	if st["sig"] != sig:
+		st = {"sig": sig, "next": 0}
+	var i = int(st["next"]) % lines.size()
+	st["next"] = i + 1
+	repeat_state[key] = st
+	last_repeat_timeline = lines[i]
+	return lines[i]
+
 func reset_for_new_game():
+	repeat_state = {}
 	indices = default_indices()
 	collected_trash = {}
 	player_position = Vector2(0, 0)

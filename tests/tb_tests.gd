@@ -1141,6 +1141,137 @@ func test_polish_smoke():
 		yield(wl, "completed")
 	finish()
 
+
+# ------------------------------------------------------------------ final smoke: jog feel + repeat dialogue
+func open_dir(min_len = 170.0):
+	var f = feet()
+	for d in [Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)]:
+		if seg_free(f, f + d * min_len):
+			return d
+	return null
+
+func key_of_dir(d):
+	if d.y > 0:
+		return KEY_S
+	if d.y < 0:
+		return KEY_W
+	return KEY_D if d.x > 0 else KEY_A
+
+func talk_once(npc, label):
+	var r = rect_of_area(npc)
+	teleport_feet(r.position + r.size * 0.5)
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	var tp = tap(KEY_SPACE, 0.1)
+	if tp is GDScriptFunctionState:
+		yield(tp, "completed")
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	var opened = dialog_node() != null
+	var pp = pump(label, 60)
+	if pp is GDScriptFunctionState:
+		yield(pp, "completed")
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	return [opened, Global.last_repeat_timeline]
+
+func test_final_smoke():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	var door = world_door("towndoor")
+	var r0 = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r0 is GDScriptFunctionState:
+		r0 = yield(r0, "completed")
+	# try each direction until one is open ground, then compare walking and jogging there
+	var home = player.global_position
+	for k in [KEY_S, KEY_A, KEY_D, KEY_W]:
+		player.global_position = home
+		yield(get_tree().create_timer(0.1, true), "timeout")
+		set_hold(k, true)
+		yield(get_tree().create_timer(0.1, true), "timeout")
+		var p0 = player.global_position
+		var t0 = t
+		yield(get_tree().create_timer(0.3, true), "timeout")
+		var walk = (player.global_position - p0).length() / (t - t0)
+		var walk_v = player.motion.length()
+		var walk_anim = player.anim_speed
+		release_all()
+		yield(get_tree().create_timer(0.3, true), "timeout")
+		if walk < 100.0:
+			L("direction key %d blocked (%.1f px/s), trying the next" % [k, walk])
+			continue
+		player.global_position = home
+		yield(get_tree().create_timer(0.1, true), "timeout")
+		set_hold(k, true)
+		set_hold(KEY_SHIFT, true)
+		yield(get_tree().create_timer(0.1, true), "timeout")
+		p0 = player.global_position
+		t0 = t
+		yield(get_tree().create_timer(0.3, true), "timeout")
+		var jog = (player.global_position - p0).length() / (t - t0)
+		var jog_v = player.motion.length()
+		var jog_anim = player.anim_speed
+		set_hold(KEY_SHIFT, false)
+		yield(get_tree().create_timer(0.15, true), "timeout")
+		var released_anim = player.anim_speed
+		release_all()
+		yield(get_tree().create_timer(0.3, true), "timeout")
+		var stopped_anim = player.anim_speed
+		L("velocity walk %.1f jog %.1f (ratio %.3f)" % [walk_v, jog_v, jog_v / max(walk_v, 0.001)])
+		L("walk %.1f px/s (anim %.2f), jog %.1f px/s (anim %.2f), Shift released while moving anim %.2f, stopped anim %.2f" % [walk, walk_anim, jog, jog_anim, released_anim, stopped_anim])
+		CHECK(abs(jog / walk - 1.25) < 0.08 and abs(jog_v / walk_v - 1.25) < 0.02, "Shift jog is ~25%% faster (distance %.3f, velocity %.3f)" % [jog / walk, jog_v / walk_v])
+		CHECK(abs(walk_anim - 1.0) < 0.001 and abs(jog_anim - 1.2) < 0.001, "walk animation 1.0x, jog animation 1.2x")
+		CHECK(abs(released_anim - 1.0) < 0.001, "animation resets as soon as Shift is released while still moving")
+		CHECK(abs(stopped_anim - 1.0) < 0.001, "animation is normal when the player stops")
+		player.global_position = home
+		break
+	if OS.get_environment("TB_ONLY_JOG") == "1":
+		finish()
+		return
+	# into the town hall
+	var r1 = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r1 is GDScriptFunctionState:
+		r1 = yield(r1, "completed")
+	var tc = tap(KEY_SPACE, 0.1)
+	if tc is GDScriptFunctionState:
+		yield(tc, "completed")
+	var pp = pump("enter_towndoor", 150)
+	if pp is GDScriptFunctionState:
+		yield(pp, "completed")
+	var in_ = wait_scene("res://Scenes/townhall.tscn", 25)
+	if in_ is GDScriptFunctionState:
+		in_ = yield(in_, "completed")
+	CHECK(in_, "entered the town hall")
+	var d1 = pump("townhall_intro", 120)
+	if d1 is GDScriptFunctionState:
+		yield(d1, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	var before = var2str(Global.indices)
+	var kate = by_script("kate.gd")[0]
+	var seq = []
+	for i in range(3):
+		var tk = talk_once(kate, "kate_%d" % i)
+		if tk is GDScriptFunctionState:
+			tk = yield(tk, "completed")
+		L("Kate talk %d: opened=%s timeline=%s" % [i + 1, str(tk[0]), tk[1]])
+		CHECK(tk[0], "Kate talk %d opens a conversation" % (i + 1))
+		seq.append(tk[1])
+	CHECK(seq[0] == "talk2brock", "Kate's first line in this mission step is the original hint (%s)" % seq[0])
+	CHECK(seq[1] != seq[0] and seq[2] != seq[1] and seq[1].begins_with("kate_brock") and seq[2].begins_with("kate_brock"), "Kate's repeats rotate through different short lines (%s, %s)" % [seq[1], seq[2]])
+	CHECK(var2str(Global.indices) == before, "repeat lines change no quest progress")
+	var gabe = by_script("gabe.gd")[0]
+	Global.indices["gabe"] = 1
+	var before2 = var2str(Global.indices)
+	var gs = []
+	for i in range(3):
+		var tg = talk_once(gabe, "gabe_%d" % i)
+		if tg is GDScriptFunctionState:
+			tg = yield(tg, "completed")
+		L("Gabe talk %d: opened=%s timeline=%s" % [i + 1, str(tg[0]), tg[1]])
+		gs.append(tg[1])
+	CHECK(gs[0] != gs[1] and gs[1] != gs[2] and gs[0] != gs[2], "Gabe's repeats rotate with no back-to-back repeat (%s)" % str(gs))
+	CHECK(var2str(Global.indices) == before2, "Gabe's repeat lines change no quest progress")
+	finish()
+
 func test_saves_unit():
 	for p in ["user://saves/save.dat", "user://saves/save.dat.bak", "user://saves/save.dat.tmp"]:
 		rm(p)
@@ -1771,6 +1902,8 @@ func main():
 	var r = null
 	if which == "doors":
 		r = test_doors()
+	elif which == "final_smoke":
+		r = test_final_smoke()
 	elif which == "polish_smoke":
 		r = test_polish_smoke()
 	elif which == "map_drift":

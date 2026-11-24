@@ -15,7 +15,14 @@ onready var state = tree.get("parameters/playback")
 
 var motion = Vector2.ZERO
 
-const JOG_FACTOR = 1.25   # holding Shift (action "jog") = about 25% faster than walking
+const JOG_FACTOR = 1.25        # holding Shift (action "jog") = about 25% faster than walking
+const JOG_ANIM_SPEED = 1.2     # the walk animation plays slightly faster while jogging
+var anim_speed = 1.0           # 1.0 = normal; JOG_ANIM_SPEED only while moving with Shift held
+
+# The AnimationTree is advanced by hand so its speed can follow the jog. Paused (dialogue, pause menu)
+# the player is not processed, so the animation stops exactly as before.
+func _process(delta):
+	tree.advance(delta * anim_speed)
 
 func _physics_process(delta):
 	if Global.moving == true:
@@ -24,7 +31,9 @@ func _physics_process(delta):
 		input_vector.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
 		# diagonals are no faster than straight lines (a held W+D used to be 41% faster)
 		input_vector = input_vector.limit_length(1.0)
+		var jogging = Input.is_action_pressed("jog") and input_vector != Vector2.ZERO
 		var speed = MAX_SPEED * (JOG_FACTOR if Input.is_action_pressed("jog") else 1.0)
+		anim_speed = JOG_ANIM_SPEED if jogging else 1.0
 
 		if input_vector != Vector2.ZERO:
 			tree.set("parameters/Idle/blend_position", input_vector)
@@ -39,6 +48,7 @@ func _physics_process(delta):
 		# map open (the only time the player is held without the tree being paused): nothing carries
 		# the player. The old code kept sliding with whatever velocity a held key had left behind.
 		motion = Vector2.ZERO
+		anim_speed = 1.0
 		state.travel("Idle")
 
 	update_interaction()
@@ -54,6 +64,7 @@ var cue = null            # marker sprite of the target in reach (tests / debugg
 var cue_target = null     # the target in reach: what the next keypress will activate
 
 func _ready():
+	tree.process_mode = AnimationTree.ANIMATION_PROCESS_MANUAL
 	markers = load("res://Scripts/interaction_markers.gd").new()
 	markers.name = "InteractionMarkers"
 	add_child(markers)

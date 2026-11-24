@@ -1,0 +1,15 @@
+{
+	"events": [
+		{
+			"character": "character-1642453155.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "u-umm... sorry, I lost my place in the book."
+		}
+	],
+	"metadata": {
+		"dialogic-version": "1.3",
+		"file": "timeline-1790000001.json",
+		"name": "jodi2"
+	}
+}
