@@ -5,6 +5,10 @@ export var exit = "brockleave"
 func _ready():
 	add_to_group("EXIT")
 
+# marker rule: the exit is locked until the house is clean
+func marker_usable():
+	return Global.indices["brockhouse"] >= 4
+
 func start_leave_request_dialog():
 	if Global.indices["brockhouse"] < 4:
 		var dialog = Dialogic.start("not-done")

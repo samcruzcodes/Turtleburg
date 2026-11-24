@@ -6,6 +6,10 @@ func _ready():
 	add_to_group("DOOR")
 	
 
+# marker rule: nothing left to do here once the house is done
+func marker_usable():
+	return Global.indices["jayhouse"] <= 1
+
 func start_door_request_dialog():
 	Global.note_door_use(self)
 	

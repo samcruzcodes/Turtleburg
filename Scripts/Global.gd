@@ -156,11 +156,19 @@ func _current_scene_path():
 	var cs = get_tree().current_scene
 	return cs.filename if cs != null else ""
 
+var _was_paused = false
+
 func _process(_delta):
 	var path = _current_scene_path()
 	if path != _last_scene:
 		_last_scene = path
 		_scene_changed_at = OS.get_ticks_msec()
+	_was_paused = get_tree().paused
+
+# A keypress that arrived while a conversation was open (and may just have closed it) or right
+# after a scene change must never also activate something in the world: one press, one action.
+func interact_allowed():
+	return not _was_paused and OS.get_ticks_msec() - _scene_changed_at > 300
 
 func _build_toast():
 	_toast_layer = CanvasLayer.new()

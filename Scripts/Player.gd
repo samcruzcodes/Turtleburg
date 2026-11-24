@@ -15,53 +15,49 @@ onready var state = tree.get("parameters/playback")
 
 var motion = Vector2.ZERO
 
-func _physics_process(delta): 
-	
+const JOG_FACTOR = 1.25   # holding Shift (action "jog") = about 25% faster than walking
+
+func _physics_process(delta):
 	if Global.moving == true:
 		var input_vector = Vector2.ZERO
 		input_vector.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
 		input_vector.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
-		input_vector = input_vector
-		
+		# diagonals are no faster than straight lines (a held W+D used to be 41% faster)
+		input_vector = input_vector.limit_length(1.0)
+		var speed = MAX_SPEED * (JOG_FACTOR if Input.is_action_pressed("jog") else 1.0)
+
 		if input_vector != Vector2.ZERO:
 			tree.set("parameters/Idle/blend_position", input_vector)
 			tree.set ("parameters/walk/blend_position", input_vector)
 			state.travel("walk")
-			motion = motion.move_toward(input_vector * MAX_SPEED, acceleration * delta)
+			motion = motion.move_toward(input_vector * speed, acceleration * delta)
 		else:
 			state.travel("Idle")
 			motion = motion.move_toward(Vector2.ZERO, friction * delta)
+		motion = move_and_slide(motion)
 	else:
-		pass
-	
-	motion = move_and_slide(motion)
-	
+		# map open (the only time the player is held without the tree being paused): nothing carries
+		# the player. The old code kept sliding with whatever velocity a held key had left behind.
+		motion = Vector2.ZERO
+		state.travel("Idle")
+
 	update_interaction()
 
 
 # ---------------------------------------------------------------------------------------------
-# Interaction + the "?" cue.
-# Space talks to / uses exactly one thing: the nearest door, exit, object or NPC inside the interact
-# circle. The cue floats over that same thing, so what you see is what Space will activate. It is only
-# shown while you are free to move, follows the target, and vanishes when you walk away, open the map,
-# start a conversation or change scene (it is a child of this player).
+# Interaction + "!" markers (see interaction_markers.gd).
+# Space, Enter and E are one action ("interact"). It activates exactly one thing: the nearest usable
+# door, exit, object or NPC inside the interact circle - the same one the bright marker sits on.
 # ---------------------------------------------------------------------------------------------
-const CUE_TEXTURE = "res://Sprites/question-mark.png"
-const CUE_SCALE = 2.0
-var cue = null
-var cue_target = null
-var cue_time = 0.0
+var markers = null
+var cue = null            # marker sprite of the target in reach (tests / debugging)
+var cue_target = null     # the target in reach: what the next keypress will activate
 
 func _ready():
-	cue = Sprite.new()
-	cue.name = "InteractCue"
-	cue.texture = load(CUE_TEXTURE)
-	cue.set_as_toplevel(true)       # ignores the player's own scale / flips
-	cue.z_as_relative = false
-	cue.z_index = 95                # above the world and the interior layers, below the map
-	cue.scale = Vector2(CUE_SCALE, CUE_SCALE)
-	cue.visible = false
-	add_child(cue)
+	markers = load("res://Scripts/interaction_markers.gd").new()
+	markers.name = "InteractionMarkers"
+	add_child(markers)
+	markers.setup(self)
 
 # Global rect covered by a collider's active collision shapes (null if it has none).
 func _collider_rect(c):
@@ -136,34 +132,13 @@ func find_interact_target():
 			d = Vector2(max(max(r.position.x - centre.x, 0.0), centre.x - r.end.x), max(max(r.position.y - centre.y, 0.0), centre.y - r.end.y)).length()
 		else:
 			d = (c.global_position - centre).length()
+		# a usable target always wins over a locked / finished one standing closer
+		if markers != null and not markers.is_usable(c):
+			d += 100000.0
 		if d < best_d:
 			best_d = d
 			best = c
 	return best
-
-# things that already carry their own "!" sign (litter, the finale marker) do not get a second cue
-func _has_own_sign(c):
-	for ch in c.get_children():
-		if ch is Sprite and ch.texture != null and str(ch.texture.resource_path).ends_with("interact.png"):
-			return true
-	return false
-
-func _update_cue(target):
-	cue_target = target
-	if target == null or _has_own_sign(target):
-		cue.visible = false
-		return
-	var r = _collider_rect(target)
-	var top = target.global_position + Vector2(0, -40)
-	var x = target.global_position.x
-	if r != null:
-		x = clamp($interact_area/CollisionShape2D.global_position.x, r.position.x, r.end.x)
-		# big collision areas (the bar, wide doorways): keep the cue close to the player, not far above
-		top = Vector2(x, max(r.position.y - 26, $interact_area/CollisionShape2D.global_position.y - 110.0))
-	cue_time += get_physics_process_delta_time()
-	cue.global_position = top + Vector2(0, sin(cue_time * 5.0) * 3.0)
-	cue.global_rotation = 0.0
-	cue.visible = true
 
 func activate_target(c):
 	if c.is_in_group("NPC") and c.has_method("start_dialog"):
@@ -175,10 +150,14 @@ func activate_target(c):
 
 func update_interaction():
 	var target = find_interact_target() if Global.moving == true else null
-	_update_cue(target)
-	if target != null and Input.is_action_just_pressed("interact"):
-		cue.visible = false
+	cue_target = target
+	if markers != null:
+		markers.update(target if target != null and markers.is_usable(target) else null)
+		cue = markers.sprite_of(target) if target != null else null
+	if target != null and Input.is_action_just_pressed("interact") and Global.interact_allowed():
 		activate_target(target)
+		if markers != null:
+			markers.update(null)
 
 func _on_interact_area_body_entered(body):
 	if body.is_in_group("NPC"):

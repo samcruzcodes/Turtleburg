@@ -767,6 +767,7 @@ func walk_layers_scene(label, home):
 			toggled += 1
 		if st["maxrun"] > 3:
 			stuck += 1
+			L("out-of-step object: %s (max %d frames, %d toggles)" % [k, st["maxrun"], st["toggles"]])
 	L("%s: walked %d px; %d objects changed side, %d flicker events, %d objects out of step >3 frames (of %d)" % [label, int(travelled), toggled, flick, stuck, lay_stats.size()])
 	CHECK(travelled > 300.0, label + ": walked around the room with real keys (%d px)" % int(travelled))
 	CHECK(toggled > 0, label + ": draw order changed while walking")
@@ -895,6 +896,249 @@ func test_cues_walk():
 	var wh = walk_layers_scene("jaysonhome", jh_home)
 	if wh is GDScriptFunctionState:
 		yield(wh, "completed")
+	finish()
+
+
+# ------------------------------------------------------------------ map open: nothing may move the player
+func log_drift(label, p0, dur):
+	var t0 = t
+	var worst = 0.0
+	while t - t0 < dur:
+		yield(get_tree(), "physics_frame")
+		worst = max(worst, (player.global_position - p0).length())
+	L("%s: max drift %.2f px, end drift %.2f px" % [label, worst, (player.global_position - p0).length()])
+	return worst
+
+func test_map_drift():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	# A: open the map while a movement key is held, then release it
+	set_hold(KEY_S, true)
+	yield(get_tree().create_timer(0.7, true), "timeout")
+	var m = tap(KEY_M, 0.08)
+	if m is GDScriptFunctionState:
+		yield(m, "completed")
+	release_all()
+	yield(get_tree().create_timer(0.15, true), "timeout")
+	var p0 = player.global_position
+	var d = log_drift("A held key at map open", p0, 1.5)
+	if d is GDScriptFunctionState:
+		d = yield(d, "completed")
+	CHECK(d < 0.5, "A: player stays put while the map is open after walking into it (%.2f px)" % d)
+	var m2 = tap(KEY_M, 0.08)
+	if m2 is GDScriptFunctionState:
+		yield(m2, "completed")
+	yield(get_tree().create_timer(0.3, true), "timeout")
+	CHECK((player.global_position - p0).length() < 0.5, "A: no snap when the map closes (%.2f px)" % (player.global_position - p0).length())
+	# B: an NPC walks through the player while the map is open
+	var npcs = get_tree().get_nodes_in_group("NPC")
+	L("npcs: %d" % npcs.size())
+	for npc in npcs:
+		var start = player.global_position
+		player.global_position = npc.global_position + Vector2(0, 8)
+		yield(get_tree().create_timer(0.2, true), "timeout")
+		var m3 = tap(KEY_M, 0.08)
+		if m3 is GDScriptFunctionState:
+			yield(m3, "completed")
+		var q0 = player.global_position
+		var npc0 = npc.global_position
+		var d2 = log_drift("B NPC %s overlapping, map open" % npc.name, q0, 2.0)
+		if d2 is GDScriptFunctionState:
+			d2 = yield(d2, "completed")
+		L("B: %s itself moved %.0f px in that time" % [npc.name, (npc.global_position - npc0).length()])
+		CHECK(d2 < 0.5, "B: %s cannot move the player while the map is open (%.2f px)" % [npc.name, d2])
+		var m4 = tap(KEY_M, 0.08)
+		if m4 is GDScriptFunctionState:
+			yield(m4, "completed")
+		var d3 = log_drift("B NPC %s after the map closes" % npc.name, q0, 0.8)
+		if d3 is GDScriptFunctionState:
+			d3 = yield(d3, "completed")
+		player.global_position = start
+	finish()
+
+
+# ------------------------------------------------------------------ polish smoke: jog, keys, markers
+func mk(node):
+	return player.markers.sprite_of(node)
+
+func shown(node):
+	var m = mk(node)
+	return m != null and m.visible
+
+func bright(node):
+	return shown(node) and mk(node).modulate.a > 0.9
+
+func measure_speed(keys, shift, dur = 0.5):
+	var home = player.global_position
+	for k in keys:
+		set_hold(k, true)
+	if shift:
+		set_hold(KEY_SHIFT, true)
+	yield(get_tree().create_timer(0.25, true), "timeout")
+	var p0 = player.global_position
+	var t0 = t
+	yield(get_tree().create_timer(dur, true), "timeout")
+	var d = (player.global_position - p0).length() / (t - t0)
+	release_all()
+	yield(get_tree().create_timer(0.2, true), "timeout")
+	player.global_position = home
+	return d
+
+func test_polish_smoke():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	# --- jog: +25%, same on diagonals, WASD and arrows
+	var res = {}
+	for cfg in [["walk S", [KEY_S], false], ["jog S", [KEY_S], true], ["jog arrow-down", [KEY_DOWN], true], ["jog S+D", [KEY_S, KEY_D], true], ["walk S+D", [KEY_S, KEY_D], false]]:
+		var v = measure_speed(cfg[1], cfg[2])
+		if v is GDScriptFunctionState:
+			v = yield(v, "completed")
+		res[cfg[0]] = v
+		L("speed %s = %.1f px/s" % [cfg[0], v])
+	CHECK(abs(res["jog S"] / res["walk S"] - 1.25) < 0.06, "jog is ~25%% faster than walking (%.2f)" % (res["jog S"] / res["walk S"]))
+	CHECK(abs(res["jog arrow-down"] / res["jog S"] - 1.0) < 0.05, "arrows and WASD jog at the same speed")
+	if res["jog S+D"] > 20.0:
+		CHECK(abs(res["jog S+D"] / res["jog S"] - 1.0) < 0.06, "diagonal jog equals straight jog (%.2f)" % (res["jog S+D"] / res["jog S"]))
+		CHECK(abs(res["walk S+D"] / res["walk S"] - 1.0) < 0.06, "diagonal walk equals straight walk (%.2f)" % (res["walk S+D"] / res["walk S"]))
+	else:
+		L("diagonal blocked by scenery here (not checked)")
+	# --- an interact key never activates two things: use a townie door and advance with Enter
+	var tdoors = by_script("towniedoor.gd")
+	var done_two = false
+	for td in tdoors:
+		var r = walk_to_area_and_interact(td, Vector2(0, 1), 280.0, false)
+		if r is GDScriptFunctionState:
+			r = yield(r, "completed")
+		if r == null:
+			continue
+		yield(get_tree().create_timer(0.3, true), "timeout")
+		if player.cue_target != td:
+			continue
+		CHECK(bright(td), "marker on the townie door in reach is bright")
+		var e = tap(KEY_E, 0.1)
+		if e is GDScriptFunctionState:
+			yield(e, "completed")
+		yield(get_tree().create_timer(0.4, true), "timeout")
+		CHECK(dialog_node() != null and not shown(td), "E opens exactly that door's dialogue and its marker hides")
+		var n = 0
+		while dialog_node() != null and n < 60:
+			var en = tap(KEY_ENTER, 0.08)
+			if en is GDScriptFunctionState:
+				yield(en, "completed")
+			yield(get_tree().create_timer(0.35, true), "timeout")
+			n += 1
+		yield(get_tree().create_timer(0.8, true), "timeout")
+		CHECK(dialog_node() == null, "Enter that closes the dialogue does not reopen it (%d presses)" % n)
+		done_two = true
+		break
+	if not done_two:
+		L("no townie door reachable for the one-press check")
+	# --- the town hall door: outdoors only the door in reach has a marker
+	var door = world_door("towndoor")
+	var r2 = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r2 is GDScriptFunctionState:
+		r2 = yield(r2, "completed")
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	var vis = 0
+	for e2 in player.markers.entries:
+		if is_instance_valid(e2["sprite"]) and e2["sprite"].visible:
+			vis += 1
+	CHECK(bright(door) and vis == 1, "outdoors: only the town hall door in reach shows a marker (%d visible)" % vis)
+	var sh1 = shot("markers_door")
+	if sh1 is GDScriptFunctionState:
+		yield(sh1, "completed")
+	var tc = tap(KEY_SPACE, 0.1)
+	if tc is GDScriptFunctionState:
+		yield(tc, "completed")
+	var pp = pump("enter_towndoor", 150)
+	if pp is GDScriptFunctionState:
+		yield(pp, "completed")
+	var in_ = wait_scene("res://Scenes/townhall.tscn", 25)
+	if in_ is GDScriptFunctionState:
+		in_ = yield(in_, "completed")
+	CHECK(in_, "Space on the highlighted door entered the town hall")
+	var d1 = pump("townhall_intro", 120)
+	if d1 is GDScriptFunctionState:
+		yield(d1, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	var nv = 0
+	for e3 in player.markers.entries:
+		if e3["sprite"].visible:
+			nv += 1
+	L("town hall: %d markers visible on room load" % nv)
+	CHECK(nv >= 2, "town hall: usable objects carry markers from the moment the room loads")
+	var sh2 = shot("markers_townhall")
+	if sh2 is GDScriptFunctionState:
+		yield(sh2, "completed")
+	var lv = leave_by_exit("exit.gd")
+	if lv is GDScriptFunctionState:
+		yield(lv, "completed")
+	var back = wait_scene("res://Scenes/World.tscn", 25)
+	if back is GDScriptFunctionState:
+		back = yield(back, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	# --- Jayson's house: markers on load, exit locked, bright on the one in reach, hide when done
+	var jd = world_door("jaysondoor")
+	var rj = walk_to_area_and_interact(jd, Vector2(0, 1), 280.0, false)
+	if rj is GDScriptFunctionState:
+		rj = yield(rj, "completed")
+	yield(get_tree().create_timer(0.3, true), "timeout")
+	CHECK(bright(jd), "Jayson's door in reach shows the bright marker")
+	var te = tap(KEY_E, 0.1)
+	if te is GDScriptFunctionState:
+		yield(te, "completed")
+	var pj = pump("enter_jaysondoor", 150)
+	if pj is GDScriptFunctionState:
+		yield(pj, "completed")
+	var inj = wait_scene("res://Scenes/Jaysonhome.tscn", 25)
+	if inj is GDScriptFunctionState:
+		inj = yield(inj, "completed")
+	CHECK(inj, "E on the highlighted door entered Jayson's house")
+	var d2 = pump("house_intro", 120)
+	if d2 is GDScriptFunctionState:
+		yield(d2, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	var toilet = by_script("old toilet jayson.gd")[0]
+	var tub = by_script("old bathtub jayson.gd")[0]
+	var leave = by_script("jaysonleave.gd")[0]
+	CHECK(shown(toilet) and shown(tub), "house: toilet and bathtub carry subtle markers on load")
+	CHECK(not shown(leave), "house: the locked exit has no marker")
+	CHECK(not bright(toilet), "house: markers out of reach are subtle (not bright)")
+	var rt = rect_of_area(toilet)
+	teleport_feet(rt.position + rt.size * 0.5)
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	CHECK(bright(toilet) and not bright(tub) and player.cue_target == toilet, "house: the toilet in reach is bright and is the target")
+	var sh3 = shot("markers_house")
+	if sh3 is GDScriptFunctionState:
+		yield(sh3, "completed")
+	var ts = tap(KEY_SPACE, 0.1)
+	if ts is GDScriptFunctionState:
+		yield(ts, "completed")
+	var pi = pump("toilet", 120)
+	if pi is GDScriptFunctionState:
+		yield(pi, "completed")
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	CHECK(not shown(toilet), "house: a finished toilet loses its marker")
+	var rb = rect_of_area(tub)
+	teleport_feet(rb.position + rb.size * 0.5)
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	var tn = tap(KEY_ENTER, 0.1)
+	if tn is GDScriptFunctionState:
+		yield(tn, "completed")
+	var pb = pump("tub", 120)
+	if pb is GDScriptFunctionState:
+		yield(pb, "completed")
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	CHECK(not shown(tub) and shown(leave), "house: Enter finished the bathtub; the exit unlocks and gets its marker")
+	var home = feet()
+	var wl = walk_layers_scene("jaysonhome", home)
+	if wl is GDScriptFunctionState:
+		yield(wl, "completed")
 	finish()
 
 func test_saves_unit():
@@ -1527,6 +1771,10 @@ func main():
 	var r = null
 	if which == "doors":
 		r = test_doors()
+	elif which == "polish_smoke":
+		r = test_polish_smoke()
+	elif which == "map_drift":
+		r = test_map_drift()
 	elif which == "cues_walk":
 		r = test_cues_walk()
 	elif which == "saves_unit":
