@@ -75,6 +75,10 @@ static func default_indices():
 
 func _ready():
 	pause_mode = Node.PAUSE_MODE_PROCESS
+	if OS.has_feature("JavaScript"):
+		# an itch.io embed can be any shape: keep the 16:9 picture undistorted (black bars) instead of
+		# stretching it to the page. Desktop builds keep the project's own stretch settings.
+		get_tree().set_screen_stretch(SceneTree.STRETCH_MODE_2D, SceneTree.STRETCH_ASPECT_KEEP, Vector2(1280, 720))
 	_build_toast()
 
 func increment_index(idx):
