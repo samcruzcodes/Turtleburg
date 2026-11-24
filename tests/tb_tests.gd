@@ -388,7 +388,7 @@ func rect_of_area(door):
 
 # Stand next to an Area2D door/exit by really walking there, then press Space.
 # approach_dir: which side to come from (unit-ish vector). Returns the player position at the press.
-func walk_to_area_and_interact(area, approach_dir, stage_dist = 280.0):
+func walk_to_area_and_interact(area, approach_dir, stage_dist = 280.0, press = true):
 	yield(get_tree(), "idle_frame")
 	var rect = rect_of_area(area)
 	var center = rect.position + rect.size * 0.5
@@ -433,6 +433,8 @@ func walk_to_area_and_interact(area, approach_dir, stage_dist = 280.0):
 		w = yield(w, "completed")
 	yield(get_tree().create_timer(0.2, true), "timeout")
 	var at_press = player.global_position
+	if not press:
+		return {"pos": at_press, "walked": w}
 	var c = tap(KEY_SPACE, 0.12)
 	if c is GDScriptFunctionState:
 		yield(c, "completed")
@@ -676,6 +678,224 @@ func key_save():
 	if c is GDScriptFunctionState:
 		yield(c, "completed")
 	yield(get_tree().create_timer(0.35, true), "timeout")
+
+
+# ------------------------------------------------------------------ cue + draw order while walking
+var sampling = false
+var lay = null
+var lay_stats = {}
+
+func _physics_process(_d):
+	if sampling and lay != null and is_instance_valid(lay) and is_instance_valid(player):
+		sample_layers()
+
+func sample_layers():
+	var fy = lay.feet_y()
+	for o in lay.objects:
+		var n = o["node"]
+		if not is_instance_valid(n):
+			continue
+		var key = "%s#%d" % [o["name"], lay.objects.find(o)]
+		var z = n.z_index
+		if not lay_stats.has(key):
+			lay_stats[key] = {"z": z, "toggles": 0, "last": -9.0, "flick": 0, "run": 0, "maxrun": 0}
+		var st = lay_stats[key]
+		if z != st["z"]:
+			st["toggles"] += 1
+			if t - st["last"] < 0.3:
+				st["flick"] += 1
+			st["last"] = t
+			st["z"] = z
+		var want = 1 if fy < o["base"] else -1
+		if z != want:
+			st["run"] += 1
+			st["maxrun"] = max(st["maxrun"], st["run"])
+		else:
+			st["run"] = 0
+
+func cue_ok(node, what):
+	yield(get_tree().create_timer(0.35, true), "timeout")
+	var cue = player.cue
+	var good = cue != null and cue.is_inside_tree() and cue.is_visible_in_tree() and player.cue_target == node
+	CHECK(good, "cue shows on %s (target=%s visible=%s)" % [what, str(player.cue_target.name) if player.cue_target != null else "none", str(cue.visible) if cue != null else "?"])
+	if good:
+		var r = player.get_node("interact_area/CollisionShape2D").global_position
+		CHECK(cue.global_position.distance_to(r) < 300.0, "cue for %s is near the player/target (%d px)" % [what, int(cue.global_position.distance_to(r))])
+	return good
+
+func cue_gone(what):
+	yield(get_tree().create_timer(0.35, true), "timeout")
+	CHECK(player.cue != null and player.cue.is_inside_tree() and not player.cue.visible and player.cue_target == null, "cue gone: " + what)
+
+func walk_layers_scene(label, home):
+	player = root().find_node("Player", true, false)
+	var ls = by_script("interior_layering.gd")
+	if ls.size() == 0:
+		FAIL(label + ": no interior_layering node")
+		return
+	lay = ls[0]
+	lay_stats = {}
+	teleport_feet(home)
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	sampling = true
+	var travelled = 0.0
+	var last = feet()
+	var shots = 0
+	# laps of real key presses around the room; collision stops the player at furniture, walls and counters
+	var laps = [[KEY_W, 1.4], [KEY_D, 1.3], [KEY_S, 2.6], [KEY_A, 1.6], [KEY_W, 2.4], [KEY_D, 2.0], [KEY_S, 2.2], [KEY_A, 2.6], [KEY_W, 1.8], [KEY_D, 1.0], [KEY_S, 1.4]]
+	for lap in laps:
+		set_hold(lap[0], true)
+		var t0 = t
+		while t - t0 < lap[1]:
+			yield(get_tree(), "physics_frame")
+			travelled += (feet() - last).length()
+			last = feet()
+		release_all()
+		if shots < 3 and lap[0] == KEY_W:
+			shots += 1
+			var shw = shot("walk_%s_%d" % [label, shots])
+			if shw is GDScriptFunctionState:
+				yield(shw, "completed")
+	sampling = false
+	var flick = 0
+	var stuck = 0
+	var toggled = 0
+	for k in lay_stats.keys():
+		var st = lay_stats[k]
+		flick += st["flick"]
+		if st["toggles"] > 0:
+			toggled += 1
+		if st["maxrun"] > 3:
+			stuck += 1
+	L("%s: walked %d px; %d objects changed side, %d flicker events, %d objects out of step >3 frames (of %d)" % [label, int(travelled), toggled, flick, stuck, lay_stats.size()])
+	CHECK(travelled > 300.0, label + ": walked around the room with real keys (%d px)" % int(travelled))
+	CHECK(toggled > 0, label + ": draw order changed while walking")
+	CHECK(flick == 0, label + ": no flicker (no object flipped sides twice within 0.3 s)")
+	CHECK(stuck == 0, label + ": draw order always matches the feet rule")
+	lay = null
+
+func _by_area(a, b):
+	return a["area"] > b["area"]
+
+func test_cues_walk():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	CHECK(player != null, "New Game reached the world")
+	var old_player = player
+	# --- outdoors: cue on the town hall door, then walk away
+	var door = world_door("towndoor")
+	var r = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r is GDScriptFunctionState:
+		r = yield(r, "completed")
+	CHECK(r != null, "reached the town hall door")
+	var c1 = cue_ok(door, "town hall door")
+	if c1 is GDScriptFunctionState:
+		yield(c1, "completed")
+	var w = walk_feet(feet() + Vector2(0, 260), 8.0)
+	if w is GDScriptFunctionState:
+		yield(w, "completed")
+	var g1 = cue_gone("walked away from the door")
+	if g1 is GDScriptFunctionState:
+		yield(g1, "completed")
+	# --- the cue target is what Space opens
+	r = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r is GDScriptFunctionState:
+		r = yield(r, "completed")
+	var c2 = cue_ok(door, "town hall door (again)")
+	if c2 is GDScriptFunctionState:
+		yield(c2, "completed")
+	var tc = tap(KEY_SPACE, 0.12)
+	if tc is GDScriptFunctionState:
+		yield(tc, "completed")
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	CHECK(dialog_node() != null and not player.cue.visible, "Space on the cue target starts its dialogue and the cue hides")
+	var pp = pump("enter_towndoor", 150)
+	if pp is GDScriptFunctionState:
+		yield(pp, "completed")
+	var in_ = wait_scene("res://Scenes/townhall.tscn", 25)
+	if in_ is GDScriptFunctionState:
+		in_ = yield(in_, "completed")
+	CHECK(in_, "Space on the cue target went into the town hall")
+	CHECK(not is_instance_valid(old_player) or old_player.is_queued_for_deletion(), "cue (and its player) removed on scene change")
+	var d1 = pump("townhall_intro", 120)
+	if d1 is GDScriptFunctionState:
+		yield(d1, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	# --- town hall: cue on every usable thing, tested by standing on it
+	var th_home = feet()
+	var n_checked = 0
+	for nd in get_tree().get_nodes_in_group("EXIT") + get_tree().get_nodes_in_group("DOOR") + get_tree().get_nodes_in_group("NPC"):
+		if n_checked >= 6 or not (nd is Area2D or nd is PhysicsBody2D):
+			continue
+		var rect = rect_of_area(nd)
+		var ctr = rect.position + rect.size * 0.5
+		teleport_feet(ctr)
+		var cc = cue_ok(nd, "town hall: " + str(nd.name))
+		if cc is GDScriptFunctionState:
+			cc = yield(cc, "completed")
+		n_checked += 1
+	CHECK(n_checked >= 3, "checked the cue on several town hall objects (%d)" % n_checked)
+	var wl = walk_layers_scene("townhall", th_home)
+	if wl is GDScriptFunctionState:
+		yield(wl, "completed")
+	# --- leave, then a house
+	var lv = leave_by_exit("exit.gd")
+	if lv is GDScriptFunctionState:
+		yield(lv, "completed")
+	var back = wait_scene("res://Scenes/World.tscn", 25)
+	if back is GDScriptFunctionState:
+		back = yield(back, "completed")
+	CHECK(back, "left the town hall")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	var jd = world_door("jaysondoor")
+	var rj = walk_to_area_and_interact(jd, Vector2(0, 1), 280.0, false)
+	if rj is GDScriptFunctionState:
+		rj = yield(rj, "completed")
+	var c3 = cue_ok(jd, "Jayson's door")
+	if c3 is GDScriptFunctionState:
+		yield(c3, "completed")
+	var tc2 = tap(KEY_SPACE, 0.12)
+	if tc2 is GDScriptFunctionState:
+		yield(tc2, "completed")
+	var pj = pump("enter_jaysondoor", 150)
+	if pj is GDScriptFunctionState:
+		yield(pj, "completed")
+	var inj = wait_scene("res://Scenes/Jaysonhome.tscn", 25)
+	if inj is GDScriptFunctionState:
+		inj = yield(inj, "completed")
+	CHECK(inj, "Space on the cue target went into Jayson's house")
+	var d2 = pump("house_intro", 120)
+	if d2 is GDScriptFunctionState:
+		yield(d2, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	var jh_home = feet()
+	# the room objects: stand on the toilet, cue, Space, cue disappears once it is used
+	var toilet = by_script("old toilet jayson.gd")[0]
+	var rt = rect_of_area(toilet)
+	teleport_feet(rt.position + rt.size * 0.5)
+	var c4 = cue_ok(toilet, "old toilet in the house")
+	if c4 is GDScriptFunctionState:
+		yield(c4, "completed")
+	var shc = shot("cue_in_room")
+	if shc is GDScriptFunctionState:
+		yield(shc, "completed")
+	var ti = tap(KEY_SPACE, 0.12)
+	if ti is GDScriptFunctionState:
+		yield(ti, "completed")
+	var pi = pump("toilet", 120)
+	if pi is GDScriptFunctionState:
+		yield(pi, "completed")
+	var g2 = cue_gone("old toilet is done")
+	if g2 is GDScriptFunctionState:
+		yield(g2, "completed")
+	var wh = walk_layers_scene("jaysonhome", jh_home)
+	if wh is GDScriptFunctionState:
+		yield(wh, "completed")
+	finish()
 
 func test_saves_unit():
 	for p in ["user://saves/save.dat", "user://saves/save.dat.bak", "user://saves/save.dat.tmp"]:
@@ -1307,6 +1527,8 @@ func main():
 	var r = null
 	if which == "doors":
 		r = test_doors()
+	elif which == "cues_walk":
+		r = test_cues_walk()
 	elif which == "saves_unit":
 		r = test_saves_unit()
 	elif which == "saves_p1":
