@@ -18,6 +18,26 @@ var motion = Vector2.ZERO
 const JOG_FACTOR = 1.25        # holding Shift (action "jog") = about 25% faster than walking
 const JOG_ANIM_SPEED = 1.2     # the walk animation plays slightly faster while jogging
 var anim_speed = 1.0           # 1.0 = normal; JOG_ANIM_SPEED only while moving with Shift held
+var facing = Vector2(0, 1)     # the way the sprite looks: always one of the four art directions
+
+# The art has four directions. On a diagonal the sprite keeps looking the way it already looks if that
+# is one of the pressed directions (so a short tap of a second key never turns it), otherwise it takes
+# the horizontal one. A stopped player keeps the last facing.
+func _update_facing(v):
+	var ax = abs(v.x)
+	var ay = abs(v.y)
+	if ax < 0.05 and ay < 0.05:
+		return
+	if ay < 0.05:
+		facing = Vector2(sign(v.x), 0)
+	elif ax < 0.05:
+		facing = Vector2(0, sign(v.y))
+	elif facing.x != 0 and facing.x == sign(v.x):
+		pass
+	elif facing.y != 0 and facing.y == sign(v.y):
+		pass
+	else:
+		facing = Vector2(sign(v.x), 0) if ax >= ay else Vector2(0, sign(v.y))
 
 # The AnimationTree is advanced by hand so its speed can follow the jog. Paused (dialogue, pause menu)
 # the player is not processed, so the animation stops exactly as before.
@@ -36,8 +56,9 @@ func _physics_process(delta):
 		anim_speed = JOG_ANIM_SPEED if jogging else 1.0
 
 		if input_vector != Vector2.ZERO:
-			tree.set("parameters/Idle/blend_position", input_vector)
-			tree.set ("parameters/walk/blend_position", input_vector)
+			_update_facing(input_vector)
+			tree.set("parameters/Idle/blend_position", facing)
+			tree.set ("parameters/walk/blend_position", facing)
 			state.travel("walk")
 			motion = motion.move_toward(input_vector * speed, acceleration * delta)
 		else:
