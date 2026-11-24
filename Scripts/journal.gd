@@ -18,7 +18,9 @@ const Z = 85
 
 var pinned = false              # session only; always starts off
 var is_open = false
-var _font = null
+var _font = null            # body text: a clear, readable font (the pixel font is kept for the title)
+var _font_title = null
+var _font_small = null
 var _panel_root = null
 var _list = null
 var _pin_box = null
@@ -94,13 +96,20 @@ func _can_open():
 func _ready():
 	layer = Z
 	pause_mode = Node.PAUSE_MODE_PROCESS
-	_font = DynamicFont.new()
-	_font.font_data = load("res://themes/8-BIT WONDER.TTF")
-	_font.size = 14
+	_font = _make_font("res://addons/dialogue_manager/example_balloon/Open_Sans/OpenSans-Regular.ttf", 21)
+	_font_title = _make_font("res://addons/dialogue_manager/example_balloon/Open_Sans/OpenSans-Bold.ttf", 26)
+	_font_small = _make_font("res://addons/dialogue_manager/example_balloon/Open_Sans/OpenSans-Regular.ttf", 17)
 	_build_panel()
 	_build_tracker()
 	_panel_root.visible = false
 	_tracker.visible = false
+
+func _make_font(path, size):
+	var f = DynamicFont.new()
+	f.font_data = load(path)
+	f.size = size
+	f.use_filter = true
+	return f
 
 func _style(alpha):
 	var sb = StyleBoxFlat.new()
@@ -113,10 +122,10 @@ func _style(alpha):
 	sb.content_margin_bottom = 16
 	return sb
 
-func _label(text, color = Color(1, 1, 1)):
+func _label(text, color = Color(1, 1, 1), font = null):
 	var l = Label.new()
 	l.text = text
-	l.add_font_override("font", _font)
+	l.add_font_override("font", font if font != null else _font)
 	l.add_color_override("font_color", color)
 	return l
 
@@ -138,22 +147,23 @@ func _build_panel():
 	pc.add_stylebox_override("panel", _style(0.96))
 	center.add_child(pc)
 	var box = VBoxContainer.new()
-	box.add_constant_override("separation", 12)
+	box.add_constant_override("separation", 16)
 	pc.add_child(box)
-	box.add_child(_label("Quests", Color(0.35, 1.0, 0.45)))
+	box.add_child(_label("Quests", Color(0.35, 1.0, 0.45), _font_title))
 	_list = VBoxContainer.new()
-	_list.add_constant_override("separation", 8)
-	_list.rect_min_size = Vector2(520, 0)
+	_list.add_constant_override("separation", 14)       # room between objectives
+	_list.rect_min_size = Vector2(640, 0)               # wide enough that no objective wraps
 	box.add_child(_list)
 	_pin_box = CheckBox.new()
 	_pin_box.text = "Pin active tasks on screen"
-	_pin_box.add_font_override("font", _font)
+	_pin_box.add_font_override("font", _font_small)
 	_pin_box.focus_mode = Control.FOCUS_NONE     # Space / Enter must never toggle it by accident
 	_pin_box.pressed = false
 	_pin_box.connect("toggled", self, "_on_pin_toggled")
 	box.add_child(_pin_box)
 	var hint = Label.new()                      # default font: the pixel font draws Q like O
 	hint.text = "Press Q again to close"
+	hint.add_font_override("font", _font_small)
 	hint.add_color_override("font_color", Color(0.7, 0.8, 0.75))
 	box.add_child(hint)
 
@@ -164,7 +174,7 @@ func _build_tracker():
 	_tracker.rect_position = Vector2(14, 96)
 	add_child(_tracker)
 	_tracker_list = VBoxContainer.new()
-	_tracker_list.add_constant_override("separation", 6)
+	_tracker_list.add_constant_override("separation", 8)
 	_tracker.add_child(_tracker_list)
 
 func _on_pin_toggled(on):
@@ -180,12 +190,23 @@ func _fill(box, list, only_active):
 		box.add_child(_label("Nothing left to do here" if only_active else "No quests yet", Color(0.7, 0.8, 0.75)))
 		return
 	if only_active:
-		box.add_child(_label("Quests", Color(0.35, 1.0, 0.45)))
+		box.add_child(_label("Quests", Color(0.35, 1.0, 0.45), _font_title))
 	for e in shown:
-		var mark = "[x] " if e["done"] else "[ ] "
-		var indent = "   " if e.get("sub", false) else ""
 		var col = Color(0.55, 0.7, 0.6) if e["done"] else Color(1, 1, 1)
-		box.add_child(_label(indent + mark + e["text"], col))
+		# one row per objective: a fixed-width check mark, then the text on a single line
+		var row = HBoxContainer.new()
+		row.add_constant_override("separation", 10)
+		var mark = _label("[x]" if e["done"] else "[  ]", col)
+		mark.rect_min_size = Vector2(46, 0)
+		row.add_child(mark)
+		row.add_child(_label(e["text"], col))
+		if e.get("sub", false):
+			var indent = MarginContainer.new()
+			indent.add_constant_override("margin_left", 36)
+			indent.add_child(row)
+			box.add_child(indent)
+		else:
+			box.add_child(row)
 
 func _refresh():
 	var list = entries(Global.indices, _scene_path())
@@ -213,14 +234,16 @@ func open():
 	_refresh()
 	_panel_root.visible = true
 	_tracker.visible = false
-	get_tree().paused = true
+	# Like the map: the world and the NPCs keep moving, the player is simply held (Global.moving).
+	Global.moving = false
 
 func close():
 	if not is_open:
 		return
 	is_open = false
 	_panel_root.visible = false
-	get_tree().paused = false
+	Global.moving = true
+	Global.map_closed_at = OS.get_ticks_msec()      # the closing key press must not also interact
 
 func _input(event):
 	if event.is_action_pressed("quests") and not event.is_echo():
@@ -234,7 +257,9 @@ func _input(event):
 		get_tree().set_input_as_handled()
 
 func _process(_delta):
-	if is_open and not _eligible_scene():
+	# anything else taking over (a scene change, a conversation, the pause menu, a reset of Global.moving)
+	# closes the journal instead of leaving it open over a walking player
+	if is_open and (not _eligible_scene() or Global._dialogue_active() or get_tree().paused or Global.moving == true):
 		close()
 	var show = pinned and not is_open and unlocked() and _eligible_scene() and Global.moving == true and not get_tree().paused
 	if show:

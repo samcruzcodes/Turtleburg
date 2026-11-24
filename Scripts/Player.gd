@@ -44,6 +44,12 @@ func _update_facing(v):
 func _process(delta):
 	tree.advance(delta * anim_speed)
 
+# Dialogues and the pause menu stop the player mid-step. Without this the last velocity was kept and
+# the player slid a few pixels once the game resumed.
+func _notification(what):
+	if what == NOTIFICATION_PAUSED or what == NOTIFICATION_UNPAUSED:
+		motion = Vector2.ZERO
+
 func _physics_process(delta):
 	if Global.moving == true:
 		var input_vector = Vector2.ZERO

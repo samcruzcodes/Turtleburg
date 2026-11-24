@@ -55,7 +55,7 @@ func _input(event):
 		if event.scancode == KEY_M or event.is_action_pressed("pause") or event.is_action_pressed("interact"):
 			_toggle_map()
 			get_tree().set_input_as_handled()
-	elif event.scancode == KEY_M:
+	elif event.scancode == KEY_M and not (Global.journal != null and Global.journal.is_open):
 		_toggle_map()
 
 # Opens the map if it is closed (used by the notice board). Closing stays on M, as before.
@@ -63,9 +63,53 @@ func open_map():
 	if Global.isVisible == true and Global.moving == true and not get_tree().paused:
 		_toggle_map()
 
+# The map art hangs under the camera node, which sits at the player, not at the middle of the screen
+# (the camera's drag margins let the two differ). Every frame the map is open, move the art so its
+# centre is the centre of the visible gameplay viewport. Markers are children of the map, so they
+# stay on the same spots of the art.
+var _map_bounds = null
+
+func _map_local_bounds():
+	if _map_bounds != null:
+		return _map_bounds
+	var mm = $Player/Camera2D2/minimap
+	var inv = mm.get_global_transform().affine_inverse()
+	var r = null
+	var stack = [mm]
+	while stack.size() > 0:
+		var n = stack.pop_back()
+		for c in n.get_children():
+			stack.append(c)
+		if n is TileMap and n.get_used_cells().size() > 0:
+			var ur = n.get_used_rect()
+			var cs = n.cell_size
+			var xf = inv * n.get_global_transform()
+			for corner in [Vector2(ur.position.x, ur.position.y), Vector2(ur.end.x, ur.position.y), Vector2(ur.position.x, ur.end.y), Vector2(ur.end.x, ur.end.y)]:
+				var pt = xf.xform(corner * cs)
+				if r == null:
+					r = Rect2(pt, Vector2.ZERO)
+				else:
+					r = r.expand(pt)
+	_map_bounds = r if r != null else Rect2(Vector2.ZERO, Vector2.ZERO)
+	return _map_bounds
+
+func _center_map():
+	var mm = $Player/Camera2D2/minimap
+	var b = _map_local_bounds()
+	if b.size == Vector2.ZERO:
+		return
+	var screen_centre = get_viewport().get_canvas_transform().affine_inverse().xform(get_viewport_rect().size * 0.5)
+	var art_centre = mm.to_global(b.position + b.size * 0.5)
+	mm.global_position += screen_centre - art_centre
+
+func _process(_delta):
+	if Global.isVisible == false:
+		_center_map()
+
 func _toggle_map():
 	if Global.isVisible == true:
 		$Player/Camera2D2/minimap.visible = true
+		_center_map()
 		map_blur.visible = true
 		Global.moving = false
 		$"top exteriors/exteriorTop".visible = false
