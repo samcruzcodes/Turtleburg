@@ -28,6 +28,8 @@
 [ext_resource path="res://edge.png" type="Texture" id=26]
 [ext_resource path="res://Scripts/minimap.gd" type="Script" id=27]
 
+[ext_resource path="res://Scripts/mapboard.gd" type="Script" id=9001]
+
 [sub_resource type="ConvexPolygonShape2D" id=178]
 points = PoolVector2Array( 0, 0, 16, 0, 16, 16, 0, 16 )
 
@@ -7658,6 +7660,9 @@ radius = 361.245
 [sub_resource type="RectangleShape2D" id=170]
 extents = Vector2( 37.3333, 35.3333 )
 
+[sub_resource type="RectangleShape2D" id=9002]
+extents = Vector2( 93.3333, 80 )
+
 [node name="Node2D" type="Node2D"]
 
 [node name="World" type="Node2D" parent="."]
@@ -8585,6 +8590,13 @@ scale = Vector2( 1.66667, 1.70833 )
 texture = ExtResource( 20 )
 
 [node name="GUI" parent="." instance=ExtResource( 8 )]
+
+[node name="mapboard" type="Area2D" parent="World"]
+position = Vector2( -226.667, -645 )
+script = ExtResource( 9001 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/mapboard"]
+shape = SubResource( 9002 )
 
 [connection signal="mouse_entered" from="World/Player/Camera2D2/minimap/TextureRect/townhall" to="World/Player/Camera2D2/minimap" method="_on_townhall_mouse_entered"]
 [connection signal="mouse_exited" from="World/Player/Camera2D2/minimap/TextureRect/townhall" to="World/Player/Camera2D2/minimap" method="_on_townhall_mouse_exited"]

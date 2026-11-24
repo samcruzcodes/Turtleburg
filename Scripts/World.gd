@@ -46,31 +46,38 @@ func end_dialog(_data):
 
 func _input(event):
 	if event is InputEventKey and event.pressed and event.scancode == KEY_M:
-		if Global.isVisible == true:
-			$Player/Camera2D2/minimap.visible = true
-			map_blur.visible = true
-			Global.moving = false
-			$"top exteriors/exteriorTop".visible = false
-			$"top exteriors/homesTop".visible = false
-			$"top exteriors/homesTop2".visible = false
-			$towndoor.visible = false
-			$stevendoor.visible = false
-			$jaysondoor.visible = false
-			$brockdoor.visible = false
-		else:
-			Global.moving = true
-			$Player/Camera2D2/minimap.visible = false
-			map_blur.visible = false
-			$"top exteriors/exteriorTop".visible = true
-			$"top exteriors/homesTop".visible = true
-			$"top exteriors/homesTop2".visible = true
-			$towndoor.visible = true
-			$stevendoor.visible = true
-			$jaysondoor.visible = true
-			$brockdoor.visible = true
-			
-		Global.isVisible = !Global.isVisible
-		
+		_toggle_map()
+
+# Opens the map if it is closed (used by the notice board). Closing stays on M, as before.
+func open_map():
+	if Global.isVisible == true and Global.moving == true and not get_tree().paused:
+		_toggle_map()
+
+func _toggle_map():
+	if Global.isVisible == true:
+		$Player/Camera2D2/minimap.visible = true
+		map_blur.visible = true
+		Global.moving = false
+		$"top exteriors/exteriorTop".visible = false
+		$"top exteriors/homesTop".visible = false
+		$"top exteriors/homesTop2".visible = false
+		$towndoor.visible = false
+		$stevendoor.visible = false
+		$jaysondoor.visible = false
+		$brockdoor.visible = false
+	else:
+		Global.moving = true
+		$Player/Camera2D2/minimap.visible = false
+		map_blur.visible = false
+		$"top exteriors/exteriorTop".visible = true
+		$"top exteriors/homesTop".visible = true
+		$"top exteriors/homesTop2".visible = true
+		$towndoor.visible = true
+		$stevendoor.visible = true
+		$jaysondoor.visible = true
+		$brockdoor.visible = true
+
+	Global.isVisible = !Global.isVisible
 
 
 ###################################

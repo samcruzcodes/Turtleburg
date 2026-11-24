@@ -80,6 +80,10 @@ func _ready():
 		# stretching it to the page. Desktop builds keep the project's own stretch settings.
 		get_tree().set_screen_stretch(SceneTree.STRETCH_MODE_2D, SceneTree.STRETCH_ASPECT_KEEP, Vector2(1280, 720))
 	_build_toast()
+	# quest journal (Q) + optional pinned tracker; derived from the progress numbers below
+	journal = load("res://Scripts/journal.gd").new()
+	journal.name = "Journal"
+	add_child(journal)
 
 func increment_index(idx):
 	if not indices.has(idx):
@@ -175,18 +179,26 @@ func _current_scene_path():
 	return cs.filename if cs != null else ""
 
 var _was_paused = false
+var _unpaused_at = -100000
+var journal = null
 
 func _process(_delta):
 	var path = _current_scene_path()
 	if path != _last_scene:
 		_last_scene = path
 		_scene_changed_at = OS.get_ticks_msec()
-	_was_paused = get_tree().paused
+	var now_paused = get_tree().paused
+	if _was_paused and not now_paused:
+		_unpaused_at = OS.get_ticks_msec()      # a conversation / the journal just closed
+	_was_paused = now_paused
 
 # A keypress that arrived while a conversation was open (and may just have closed it) or right
 # after a scene change must never also activate something in the world: one press, one action.
 func interact_allowed():
-	return not _was_paused and OS.get_ticks_msec() - _scene_changed_at > 300
+	var now = OS.get_ticks_msec()
+	# also ignore a quick second tap right after a conversation closes (players skip text by tapping
+	# Space / Enter / E, and the last tap must not immediately talk to the same person again)
+	return not _was_paused and now - _scene_changed_at > 300 and now - _unpaused_at > 250
 
 func _build_toast():
 	_toast_layer = CanvasLayer.new()

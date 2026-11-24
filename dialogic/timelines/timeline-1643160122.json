@@ -648,6 +648,12 @@
 			"event_id": "dialogic_001",
 			"portrait": "",
 			"text": "If you get lost check your map by pressing \"m\".\nIf you forget what to do check your current quest by pressing \"q\""
+		},
+		{
+			"character": "character-1642288578.json",
+			"event_id": "dialogic_001",
+			"portrait": "",
+			"text": "Press Q to see your current quests."
 		}
 	],
 	"metadata": {

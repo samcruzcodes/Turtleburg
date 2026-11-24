@@ -2,7 +2,7 @@ extends KinematicBody2D
 
 export var acceleration = 5000
 export var friction = 5000
-export var MAX_SPEED = 150 # The speed of the character
+export var MAX_SPEED = 165 # Walking speed in px/s (jogging = x1.25, see JOG_FACTOR)
 
 var StevenNPC = load("res://Scripts/stevennpc.gd").new()
 var BrockNPC = load("res://Scripts/brocknpc.gd").new()

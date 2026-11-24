@@ -145,6 +145,9 @@ func pump(label = "", timeout = 150.0):
 	var seen = false
 	while t - start < timeout:
 		var d = dialog_node()
+		# a dialogue that has already unpaused the game is closing: never keep tapping into the world
+		if d != null and not get_tree().paused:
+			d = null
 		if d == null:
 			idle += 1
 			if idle > 6:
@@ -1161,6 +1164,7 @@ func talk_once(npc, label):
 	var r = rect_of_area(npc)
 	teleport_feet(r.position + r.size * 0.5)
 	yield(get_tree().create_timer(0.6, true), "timeout")
+	L("before pressing at %s: target=%s moving=%s paused=%s allowed=%s dialog=%s feet=%s" % [str(npc.name), str(player.cue_target.name) if player.cue_target != null else "none", str(Global.moving), str(get_tree().paused), str(Global.interact_allowed()), str(dialog_node() != null), str(feet())])
 	var tp = tap(KEY_SPACE, 0.1)
 	if tp is GDScriptFunctionState:
 		yield(tp, "completed")
@@ -1270,6 +1274,264 @@ func test_final_smoke():
 		gs.append(tg[1])
 	CHECK(gs[0] != gs[1] and gs[1] != gs[2] and gs[0] != gs[2], "Gabe's repeats rotate with no back-to-back repeat (%s)" % str(gs))
 	CHECK(var2str(Global.indices) == before2, "Gabe's repeat lines change no quest progress")
+	finish()
+
+
+# ------------------------------------------------------------------ probe: what is in front of the town hall
+func test_probe_board():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	var door = world_door("towndoor")
+	var r0 = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r0 is GDScriptFunctionState:
+		r0 = yield(r0, "completed")
+	L("door at %s player at %s" % [str(door.global_position), str(player.global_position)])
+	teleport_feet(Vector2(-40, -760))
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	var sh = shot("probe_townhall_front")
+	if sh is GDScriptFunctionState:
+		yield(sh, "completed")
+	finish()
+
+
+# ------------------------------------------------------------------ release smoke (run against the exported app)
+func to_screen(p):
+	return get_viewport().get_canvas_transform().xform(p)
+
+func mouse_move(screen):
+	var ev = InputEventMouseMotion.new()
+	ev.position = screen
+	ev.global_position = screen
+	Input.parse_input_event(ev)
+
+func mouse_click(screen):
+	mouse_move(screen)
+	yield(get_tree().create_timer(0.1, true), "timeout")
+	for down in [true, false]:
+		var b = InputEventMouseButton.new()
+		b.button_index = BUTTON_LEFT
+		b.pressed = down
+		b.position = screen
+		b.global_position = screen
+		b.button_mask = BUTTON_MASK_LEFT if down else 0
+		Input.parse_input_event(b)
+		yield(get_tree().create_timer(0.08, true), "timeout")
+
+func journal_texts():
+	var out = []
+	for e in Global.journal.entries(Global.indices, scene_path()):
+		out.append(e["text"])
+	return out
+
+func has_text(prefix):
+	for t_ in journal_texts():
+		if t_.begins_with(prefix):
+			return true
+	return false
+
+func test_release_a():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	CHECK(File.new().file_exists("res://dialogic/timelines/timeline-1790000005.json") and File.new().file_exists("res://dialogic/timelines/timeline-1790000001.json"), "new repeat timelines are bundled in this build")
+	var fq = File.new()
+	fq.open("res://dialogic/timelines/timeline-1643160122.json", File.READ)
+	CHECK(fq.get_as_text().find("Press Q to see your current quests.") != -1, "the town hall conversation carries the Q line")
+	fq.close()
+	# --- the left notice board: far / near
+	var board = by_script("mapboard.gd")[0]
+	var br = rect_of_area(board)
+	L("board rect %s, player at %s" % [str(br), str(player.global_position)])
+	var click = InputEventMouseButton.new()
+	click.button_index = BUTTON_LEFT
+	click.pressed = true
+	var d_far = player.global_position.distance_to(br.position + br.size * 0.5)
+	CHECK(d_far > 300.0 and not shown(board) and player.cue_target != board, "board: no marker and not a target when far (%d px)" % int(d_far))
+	board._on_input_event(null, click, 0)
+	yield(get_tree().create_timer(0.3, true), "timeout")
+	CHECK(Global.isVisible, "board: a click from far away does nothing")
+	teleport_feet(Vector2(br.position.x + br.size.x * 0.5, br.position.y - 8.0))
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	L("board near: target=%s feet=%s interact centre=%s moving=%s" % [str(player.cue_target.name) if player.cue_target != null else "none", str(feet()), str(player.get_node("interact_area/CollisionShape2D").global_position), str(Global.moving)])
+	CHECK(player.cue_target == board and bright(board), "board: bright ! and it is the target when near")
+	var blur = root().find_node("MapBlur", true, false)
+	for key in [KEY_SPACE, KEY_ENTER, KEY_E]:
+		var tk = tap(key, 0.1)
+		if tk is GDScriptFunctionState:
+			yield(tk, "completed")
+		yield(get_tree().create_timer(0.6, true), "timeout")
+		CHECK(not Global.isVisible and blur != null and blur.visible and dialog_node() == null, "board: key %d opens the map with the blur and no dialogue" % key)
+		var tm = tap(KEY_M, 0.1)
+		if tm is GDScriptFunctionState:
+			yield(tm, "completed")
+		yield(get_tree().create_timer(0.7, true), "timeout")
+		CHECK(Global.isVisible and not blur.visible, "board: M closes the map again")
+	var cl = mouse_click(to_screen(br.position + br.size * 0.5))
+	if cl is GDScriptFunctionState:
+		yield(cl, "completed")
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	CHECK(not Global.isVisible, "board: a nearby mouse click opens the map")
+	var tm2 = tap(KEY_M, 0.1)
+	if tm2 is GDScriptFunctionState:
+		yield(tm2, "completed")
+	yield(get_tree().create_timer(0.7, true), "timeout")
+	# --- into the town hall
+	var door = world_door("towndoor")
+	var r0 = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r0 is GDScriptFunctionState:
+		r0 = yield(r0, "completed")
+	var tc = tap(KEY_SPACE, 0.1)
+	if tc is GDScriptFunctionState:
+		yield(tc, "completed")
+	var pp = pump("enter_towndoor", 150)
+	if pp is GDScriptFunctionState:
+		yield(pp, "completed")
+	var in_ = wait_scene("res://Scenes/townhall.tscn", 25)
+	if in_ is GDScriptFunctionState:
+		in_ = yield(in_, "completed")
+	CHECK(in_, "entered the town hall")
+	var d1 = pump("townhall_intro", 200)
+	if d1 is GDScriptFunctionState:
+		yield(d1, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	CHECK(Global.journal.unlocked(), "journal unlocked after the town hall introduction")
+	Global.journal.pinned = true                 # pin state was verified in the previous run; only the hiding is checked here
+	# --- Jodi: the real first conversation, then an immediate repeat (no counters pre-set)
+	var jodi = by_script("jodi.gd")[0]
+	var j1 = talk_once(jodi, "jodi_first")
+	if j1 is GDScriptFunctionState:
+		j1 = yield(j1, "completed")
+	CHECK(j1[0] and Global.indices["jodi"] == 1, "Jodi: the original conversation played and her counter moved once (%d)" % Global.indices["jodi"])
+	var snap = var2str(Global.indices)
+	var j2 = talk_once(jodi, "jodi_again")
+	if j2 is GDScriptFunctionState:
+		j2 = yield(j2, "completed")
+	var j3 = talk_once(jodi, "jodi_again2")
+	if j3 is GDScriptFunctionState:
+		j3 = yield(j3, "completed")
+	L("Jodi repeats: %s then %s" % [j2[1], j3[1]])
+	CHECK(j2[0] and j2[1] == "jodi1" and j3[1] == "jodi2", "Jodi: an immediate repeat is a short line, then a different one (%s, %s)" % [j2[1], j3[1]])
+	CHECK(var2str(Global.indices) == snap, "Jodi's repeats change no progress")
+	# --- Kate: the hint for the current step, a repeat, then a newly unlocked step takes priority
+	var kate = by_script("kate.gd")[0]
+	var k1 = talk_once(kate, "kate_1")
+	if k1 is GDScriptFunctionState:
+		k1 = yield(k1, "completed")
+	var k2 = talk_once(kate, "kate_2")
+	if k2 is GDScriptFunctionState:
+		k2 = yield(k2, "completed")
+	Global.indices["brockhouse"] = 1            # simulate unlocking the next step
+	var k3 = talk_once(kate, "kate_3")
+	if k3 is GDScriptFunctionState:
+		k3 = yield(k3, "completed")
+	L("Kate: %s, %s, then after the unlock %s" % [k1[1], k2[1], k3[1]])
+	CHECK(k1[1] == "talk2brock" and k2[1] == "kate_brock2" and k3[1] == "talk2jayson", "Kate: hint, short repeat, then the newly unlocked hint comes first (%s %s %s)" % [k1[1], k2[1], k3[1]])
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	CHECK(Global.journal.pinned and Global.journal._tracker.visible, "pinned tracker is visible while playing")
+	var tt = tap(KEY_SPACE, 0.1)
+	if tt is GDScriptFunctionState:
+		yield(tt, "completed")
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	CHECK(dialog_node() != null and not Global.journal._tracker.visible, "tracker hides during a conversation")
+	finish()
+
+func test_release_b():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1                  # reach the house door without the town hall detour
+	var jd = world_door("jaysondoor")
+	var rj = walk_to_area_and_interact(jd, Vector2(0, 1), 280.0, false)
+	if rj is GDScriptFunctionState:
+		rj = yield(rj, "completed")
+	var te = tap(KEY_E, 0.1)
+	if te is GDScriptFunctionState:
+		yield(te, "completed")
+	var pj = pump("enter_jaysondoor", 150)
+	if pj is GDScriptFunctionState:
+		yield(pj, "completed")
+	var inj = wait_scene("res://Scenes/Jaysonhome.tscn", 25)
+	if inj is GDScriptFunctionState:
+		inj = yield(inj, "completed")
+	CHECK(inj, "E on the highlighted door entered Jayson's house")
+	var d2 = pump("house_intro", 120)
+	if d2 is GDScriptFunctionState:
+		yield(d2, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	var toilet = by_script("old toilet jayson.gd")[0]
+	var tub = by_script("old bathtub jayson.gd")[0]
+	var leave = by_script("jaysonleave.gd")[0]
+	var seen = {}
+	var dup = 0
+	for e in player.markers.entries:
+		if seen.has(e["target"]):
+			dup += 1
+		seen[e["target"]] = true
+	CHECK(dup == 0, "one marker per object (%d markers)" % player.markers.entries.size())
+	for pair in [["toilet", toilet], ["bathtub", tub]]:
+		var tg = pair[1]
+		var ent = null
+		for e in player.markers.entries:
+			if e["target"] == tg:
+				ent = e
+		var orig = ent["orig"]
+		CHECK(orig != null, "%s has an original ? node to anchor on" % pair[0])
+		if orig != null:
+			var dist = ent["sprite"].global_position.distance_to(orig.global_position)
+			L("%s: original ? at %s, ! at %s, collider rect %s" % [pair[0], str(orig.global_position), str(ent["sprite"].global_position), str(rect_of_area(tg))])
+			CHECK(dist < 1.0 and ent["sprite"].visible and not orig.visible, "%s: the ! sits on the original ? position and the ? stays hidden (%.2f px)" % [pair[0], dist])
+			CHECK(abs(ent["sprite"].modulate.a - 0.45) < 0.02, "%s: subtle ! on room load" % pair[0])
+			var mm = mouse_move(to_screen(orig.global_position))
+			yield(get_tree().create_timer(0.25, true), "timeout")
+			CHECK(ent["sprite"].modulate.a > 0.95 and player.cue_target != tg, "%s: hovering brightens that same marker (not the keyboard target)" % pair[0])
+			mouse_move(Vector2(40, 40))
+			yield(get_tree().create_timer(0.25, true), "timeout")
+			CHECK(abs(ent["sprite"].modulate.a - 0.45) < 0.02, "%s: marker goes back to subtle when the mouse leaves" % pair[0])
+	CHECK(not shown(leave), "the locked exit has no marker")
+	var sh = shot("bathroom_markers")
+	if sh is GDScriptFunctionState:
+		yield(sh, "completed")
+	# keyboard: Space on the toilet, E on the bathtub, Enter on the unlocked exit
+	var rt = rect_of_area(toilet)
+	teleport_feet(rt.position + rt.size * 0.5)
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	CHECK(player.cue_target == toilet and bright(toilet), "toilet in reach is the bright target")
+	var ts = tap(KEY_SPACE, 0.1)
+	if ts is GDScriptFunctionState:
+		yield(ts, "completed")
+	var p1 = pump("toilet", 120)
+	if p1 is GDScriptFunctionState:
+		yield(p1, "completed")
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	CHECK(not shown(toilet) and Global.indices["jayhouse"] == 1, "Space fixed exactly the toilet; its marker is gone")
+	var rb = rect_of_area(tub)
+	teleport_feet(rb.position + rb.size * 0.5)
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	CHECK(player.cue_target == tub and bright(tub), "bathtub in reach is the bright target")
+	var tk = tap(KEY_E, 0.1)
+	if tk is GDScriptFunctionState:
+		yield(tk, "completed")
+	var p2 = pump("tub", 120)
+	if p2 is GDScriptFunctionState:
+		yield(p2, "completed")
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	CHECK(not shown(tub) and Global.indices["jayhouse"] == 2 and shown(leave), "E fixed exactly the bathtub; the exit unlocks and gets its marker")
+	var rl = rect_of_area(leave)
+	teleport_feet(rl.position + rl.size * 0.5)
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	var tn = tap(KEY_ENTER, 0.1)
+	if tn is GDScriptFunctionState:
+		yield(tn, "completed")
+	var p3 = pump("leave", 120)
+	if p3 is GDScriptFunctionState:
+		yield(p3, "completed")
+	var back = wait_scene("res://Scenes/World.tscn", 25)
+	if back is GDScriptFunctionState:
+		back = yield(back, "completed")
+	CHECK(back, "Enter on the highlighted exit left the house")
 	finish()
 
 func test_saves_unit():
@@ -1902,6 +2164,12 @@ func main():
 	var r = null
 	if which == "doors":
 		r = test_doors()
+	elif which == "release_a":
+		r = test_release_a()
+	elif which == "release_b":
+		r = test_release_b()
+	elif which == "probe_board":
+		r = test_probe_board()
 	elif which == "final_smoke":
 		r = test_final_smoke()
 	elif which == "polish_smoke":

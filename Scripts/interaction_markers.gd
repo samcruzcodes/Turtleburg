@@ -6,6 +6,9 @@ extends Node
 #   * Inside rooms every usable target carries a subtle marker from the moment the room loads; the
 #     one in reach (the one Space / Enter / E will activate) is brighter and larger.
 #   * Outdoors only the target in reach shows a marker.
+#   * Where the game's original "?" nodes exist (toilets, tubs, the laundry counter, the bedroom
+#     notes, Brock's shakes) the "!" sits exactly where that "?" was; those old nodes stay hidden, so
+#     there is only ever one marker per object. Hovering the object with the mouse brightens its marker.
 #   * Locked or finished things (no active collision, or marker_usable() == false) show nothing.
 #   * Markers are children of the Player, so they vanish with it on a scene change, and they are
 #     hidden whenever the player cannot act (map open).
@@ -14,6 +17,8 @@ const Z = 95
 const SUBTLE_SCALE = 1.1
 const BRIGHT_SCALE = 1.6
 const SUBTLE_ALPHA = 0.45
+const HOVER_MARGIN = 10.0
+const ORIGINAL_ART = "question-mark.png"
 
 var player = null
 var interior = false
@@ -39,6 +44,9 @@ func _scan():
 			if seen.has(nd) or not player._is_interactable(nd) or _has_own_sign(nd):
 				continue
 			seen[nd] = true
+			var orig = _original_marker(nd)
+			if orig != null:
+				orig.visible = false
 			var s = Sprite.new()
 			s.name = "Marker_" + str(nd.name)
 			s.texture = texture
@@ -47,7 +55,7 @@ func _scan():
 			s.z_index = Z
 			s.visible = false
 			add_child(s)
-			entries.append({"target": nd, "sprite": s})
+			entries.append({"target": nd, "sprite": s, "orig": orig})
 
 # things that already carry their own "!" sign (litter, the finale marker) get no second one
 func _has_own_sign(c):
@@ -55,6 +63,16 @@ func _has_own_sign(c):
 		if ch is Sprite and ch.texture != null and str(ch.texture.resource_path).ends_with("interact.png"):
 			return true
 	return false
+
+# the game's own hidden "?" sprite for this object (null if it has none)
+func _original_marker(c):
+	for ch in c.get_children():
+		if ch is Sprite and ch.texture != null and str(ch.texture.resource_path).ends_with(ORIGINAL_ART):
+			return ch
+		var deeper = _original_marker(ch) if not (ch is Area2D) and not (ch is KinematicBody2D) else null
+		if deeper != null:
+			return deeper
+	return null
 
 func is_usable(c):
 	if c.has_method("marker_usable") and not c.marker_usable():
@@ -77,18 +95,39 @@ func update(reach):
 		if not is_instance_valid(c):
 			s.visible = false
 			continue
+		var orig = e.get("orig")
+		if orig != null and is_instance_valid(orig):
+			orig.visible = false              # never show the old "?" next to the "!"
 		var is_reach = (c == reach)
 		var show = free and is_usable(c) and (interior or is_reach)
 		if not show:
 			s.visible = false
 			continue
-		var a = _anchor(c)
+		var hover = interior and _hovered(c, orig)
+		var bright = is_reach or hover
 		var bob = sin(time * 6.0) * 3.0 if is_reach else 0.0
-		var sc = BRIGHT_SCALE if is_reach else SUBTLE_SCALE
+		var sc = BRIGHT_SCALE if bright else SUBTLE_SCALE
+		if orig != null and is_instance_valid(orig):
+			# the original "?" position is the anchor (centre of the marker)
+			var os = orig.get_global_transform().get_scale().x
+			var base = clamp(abs(os), SUBTLE_SCALE, 1.5)
+			sc = base * (1.45 if bright else 1.0)
+			s.global_position = orig.global_position + Vector2(0, bob)
+		else:
+			s.global_position = _anchor(c) + Vector2(0, -16.0 * sc - 4.0 + bob)
 		s.scale = Vector2(sc, sc)
-		s.modulate = Color(1, 1, 1, 1.0 if is_reach else SUBTLE_ALPHA)
-		s.global_position = a + Vector2(0, -16.0 * sc - 4.0 + bob)
+		s.modulate = Color(1, 1, 1, 1.0 if bright else SUBTLE_ALPHA)
 		s.visible = true
+
+# mouse over the object (its collision area or the spot its marker sits on)
+func _hovered(c, orig):
+	var m = c.get_global_mouse_position()
+	var r = player._collider_rect(c)
+	if r != null and r.grow(HOVER_MARGIN).has_point(m):
+		return true
+	if orig != null and is_instance_valid(orig) and orig.global_position.distance_to(m) < 26.0:
+		return true
+	return false
 
 # ------------------------------------------------------------------ where the visible part is
 func _anchor(c):
@@ -106,7 +145,7 @@ func _anchor(c):
 
 func _sprites(n, out):
 	for ch in n.get_children():
-		if ch is Sprite and ch.texture != null and ch.is_visible_in_tree() and ch.name != "question" and ch.name != "check":
+		if ch is Sprite and ch.texture != null and ch.is_visible_in_tree() and not str(ch.texture.resource_path).ends_with(ORIGINAL_ART):
 			out.append(ch)
 		if not (ch is Area2D) and not (ch is KinematicBody2D):
 			_sprites(ch, out)
