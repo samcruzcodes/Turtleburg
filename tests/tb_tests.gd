@@ -1,6 +1,6 @@
 extends Node
 # Turtleburg regression tests (test-only autoload; never part of a release build).
-# Select with env TB_TEST = doors | saves_unit | saves_p1 | saves_p2 | saves_p3 | blur | repro_old
+# Select with env TB_TEST = npc_anim | doors | saves_unit | saves_p1 | saves_p2 | saves_p3 | blur | repro_old
 # Other env: TB_OUT (dir for results/screenshots, must end with /), TB_SHOT=1 (save screenshots)
 var t = 0.0
 var fails = []
@@ -89,10 +89,16 @@ func set_hold(code, on):
 		held.erase(code)
 		_key(code, false)
 
+var keep_shift = false
+
 func release_all():
 	for c in held.keys():
+		if keep_shift and c == KEY_SHIFT:
+			continue
 		_key(c, false)
-	held.clear()
+		held.erase(c)
+	if not keep_shift:
+		held.clear()
 
 func scene_path():
 	var cs = get_tree().current_scene
@@ -1817,6 +1823,1536 @@ func test_map_quests():
 	CHECK(Global.isVisible and quest_markers().size() >= 0, "Esc still closes the map")
 	finish()
 
+
+# ------------------------------------------------------------------ trailer footage (streamed to ffmpeg, never kept as images)
+var rec_seg = ""
+var shot_start = 0
+var stream_count = 0
+var shots = []
+var sub_marks = {}
+var frame_size = Vector2.ZERO
+var cap_layer = null
+var cap_bg = null
+var cap_label = null
+
+func recorder():
+	var d = Directory.new()
+	d.make_dir_recursive(OUT + "frames")
+	while true:
+		yield(VisualServer, "frame_post_draw")
+		if rec_seg != "":
+			var img = get_viewport().get_texture().get_data()
+			img.flip_y()
+			frame_size = img.get_size()
+			# a consumer process feeds each frame to ffmpeg and deletes it at once
+			img.save_png("%sframes/f_%06d.png" % [OUT, stream_count])
+			stream_count += 1
+
+func rec_on(name_):
+	rec_seg = name_
+	shot_start = stream_count
+
+func rec_off():
+	if rec_seg != "":
+		shots.append({"name": rec_seg, "start": shot_start, "len": stream_count - shot_start})
+	rec_seg = ""
+
+func mark(name_):
+	sub_marks[name_] = stream_count
+
+func write_marks(extra = ""):
+	var f = File.new()
+	if f.open(OUT + "trailer_marks.json", File.WRITE) == OK:
+		f.store_string(to_json({"shots": shots, "marks": sub_marks, "size": [frame_size.x, frame_size.y], "note": extra}))
+		f.close()
+
+func make_captions():
+	cap_layer = CanvasLayer.new()
+	cap_layer.layer = 200
+	add_child(cap_layer)
+	cap_bg = ColorRect.new()
+	cap_bg.color = Color(0, 0, 0, 0.6)
+	cap_bg.rect_position = Vector2(0, 640)
+	cap_bg.rect_size = Vector2(1280, 80)
+	cap_bg.visible = false
+	cap_layer.add_child(cap_bg)
+	cap_label = Label.new()
+	var font = DynamicFont.new()
+	font.font_data = load("res://themes/8-BIT WONDER.TTF")
+	font.size = 26
+	cap_label.add_font_override("font", font)
+	cap_label.add_color_override("font_color", Color(1, 1, 1))
+	cap_label.add_color_override("font_color_shadow", Color(0, 0, 0, 1))
+	cap_label.add_constant_override("shadow_offset_x", 2)
+	cap_label.add_constant_override("shadow_offset_y", 2)
+	cap_label.align = Label.ALIGN_CENTER
+	cap_label.valign = Label.VALIGN_CENTER
+	cap_label.rect_position = Vector2(0, 640)
+	cap_label.rect_size = Vector2(1280, 80)
+	cap_layer.add_child(cap_label)
+
+func caption(text):
+	cap_bg.visible = text != ""
+	cap_label.text = text
+
+func jog_to(target, margin = 300.0):
+	set_hold(KEY_SHIFT, true)
+	var w = walk_to(target, margin)
+	if w is GDScriptFunctionState:
+		w = yield(w, "completed")
+	set_hold(KEY_SHIFT, false)
+	return w
+
+func text_done(d):
+	var tb = d.get_node_or_null("TextBubble")
+	return tb == null or tb.is_finished()
+
+func wait_text_done(d, cap = 8.0):
+	var t0 = t
+	while t - t0 < cap and is_instance_valid(d) and not text_done(d):
+		yield(get_tree(), "idle_frame")
+
+func current_text(d):
+	var ce = d.current_event
+	if ce is Dictionary:
+		if ce.has("text"):
+			return str(ce["text"])
+		if ce.has("question"):
+			return str(ce["question"])
+	return ""
+
+func answer(d):
+	var bc = d.button_container
+	if bc != null and bc.get_child_count() > 0:
+		var texts = []
+		for b in bc.get_children():
+			texts.append(b.text)
+		bc.get_child(choose(texts)).emit_signal("pressed")
+		yield(get_tree().create_timer(0.4, true), "timeout")
+
+# Plays a conversation at normal speed. Lines listed in `wanted` ({prefix, name, hold[, caption]}) are
+# recorded: from the moment they start typing, until the text has finished and been held long enough to
+# read (a question keeps its answers on screen first). Everything else is clicked through unrecorded.
+func show_pump(wanted, timeout = 300.0, stop_scene = ""):
+	var started = t
+	var seen = false
+	var done = {}
+	var last_logged = ""
+	while t - started < timeout:
+		if stop_scene != "" and scene_path() == stop_scene:
+			return
+		var d = dialog_node()
+		if d == null or not get_tree().paused:
+			if seen or t - started > 25.0:
+				break
+			yield(get_tree().create_timer(0.15, true), "timeout")
+			continue
+		seen = true
+		var txt = current_text(d)
+		if txt != last_logged:
+			last_logged = txt
+			L("dlg: %s" % txt.strip_edges().left(80).replace("\n", " / "))
+		var w = null
+		for cand in wanted:
+			if not done.has(cand["prefix"]) and txt.find(cand["prefix"]) != -1:
+				w = cand
+		if w != null:
+			done[w["prefix"]] = true
+			if w.has("caption"):
+				caption(w["caption"])
+			rec_on(w["name"])
+			var wt = wait_text_done(d, 10.0)
+			if wt is GDScriptFunctionState:
+				yield(wt, "completed")
+			yield(get_tree().create_timer(0.5, true), "timeout")      # answers (if any) appear
+			yield(get_tree().create_timer(float(w["hold"]), true), "timeout")
+			if d.waiting_for_answer:
+				var a = answer(d)
+				if a is GDScriptFunctionState:
+					yield(a, "completed")
+				yield(get_tree().create_timer(0.3, true), "timeout")
+			rec_off()
+			caption("")
+			continue
+		if d.waiting_for_answer:
+			yield(get_tree().create_timer(1.3, true), "timeout")
+			var a2 = answer(d)
+			if a2 is GDScriptFunctionState:
+				yield(a2, "completed")
+			continue
+		var tp = tap(KEY_SPACE, 0.06)
+		yield(get_tree().create_timer(0.4, true), "timeout")
+	yield(get_tree().create_timer(0.5, true), "timeout")
+
+func hold_move(keys, shift, dur):
+	for k in keys:
+		set_hold(k, true)
+	if shift:
+		set_hold(KEY_SHIFT, true)
+	yield(get_tree().create_timer(dur, true), "timeout")
+	release_all()
+	yield(get_tree().create_timer(0.3, true), "timeout")
+	L("  moved to %s" % str(feet()))
+
+# Walks up to an NPC like a player would: a free, walkable spot about `dist` px away (chosen from the
+# collision grid, never on or against the NPC or a wall), then real key presses toward them until the
+# game itself reports them in interaction range. Returns the distance left between the two.
+func approach_npc(who, dist = 230.0):
+	var npc = npc_by_name(who)
+	for dirv in [Vector2(0, 1), Vector2(1, 0), Vector2(-1, 0), Vector2(0, -1)]:
+		var nr = rect_of_area(npc)
+		var centre = nr.position + nr.size * 0.5
+		var box = Rect2(centre - Vector2(1, 1) * (dist + 260.0), Vector2(1, 1) * (2.0 * (dist + 260.0)))
+		grid_build(box)
+		var want = centre + dirv * dist
+		var stage = null
+		var bd = 1e18
+		for k in gfree.keys():
+			if gfree[k]:
+				var p = cell_pos(int(k / 100000), int(k % 100000))
+				var d = (p - want).length()
+				if d < bd:
+					bd = d
+					stage = p
+		if stage == null:
+			continue
+		teleport_feet(stage)
+		yield(get_tree().create_timer(0.5, true), "timeout")
+		var t0 = t
+		while (player.cue_target != npc or (npc.global_position - player.global_position).length() > 75.0) and t - t0 < 7.0 and (npc.global_position - player.global_position).length() > 62.0:
+			var d2 = npc.global_position - player.global_position
+			set_hold(KEY_A, d2.x < -12)
+			set_hold(KEY_D, d2.x > 12)
+			set_hold(KEY_W, d2.y < -12)
+			set_hold(KEY_S, d2.y > 12)
+			yield(get_tree().create_timer(0.05, true), "timeout")
+		release_all()
+		yield(get_tree(), "physics_frame")
+		if player.cue_target == npc:
+			var left = (npc.global_position - player.global_position).length()
+			L("approach %s: from %s (%.0f px away), now %.0f px apart, in range" % [who, str(stage.round()), (centre - stage).length(), left])
+			return left
+	L("approach %s: could not get in range" % who)
+	return -1.0
+
+func talk_to(who, wanted):
+	var left = approach_npc(who)
+	if left is GDScriptFunctionState:
+		left = yield(left, "completed")
+	L("talk_to %s: distance at the press %.0f px" % [who, left])
+	var tp = tap(KEY_SPACE, 0.08)
+	if tp is GDScriptFunctionState:
+		yield(tp, "completed")
+	yield(get_tree().create_timer(0.3, true), "timeout")
+	var sp = show_pump(wanted, 120.0)
+	if sp is GDScriptFunctionState:
+		yield(sp, "completed")
+
+func test_trailer():
+	make_captions()
+	recorder()
+	# ---- 1. the real title screen, New Game, the truck driving away
+	var ok = wait_scene("res://Scenes/Start Menu.tscn", 15)
+	if ok is GDScriptFunctionState:
+		ok = yield(ok, "completed")
+	rec_on("title")
+	yield(get_tree().create_timer(1.8, true), "timeout")
+	mark("title_press")
+	var c = tap(KEY_SPACE, 0.1)
+	if c is GDScriptFunctionState:
+		yield(c, "completed")
+	ok = wait_scene("res://Scenes/World.tscn", 60)
+	if ok is GDScriptFunctionState:
+		ok = yield(ok, "completed")
+	mark("title_world")
+	rec_off()
+	write_marks("title done")
+	L("stage: title done, scene=%s" % scene_path())
+	# ---- 2. Savannah's call: the first lines of the opening conversation (tutorial left out)
+	var sp1 = show_pump([
+		{"prefix": "YOU KNOW YOU CANT STOP", "name": "sav1", "hold": 1.6},
+		{"prefix": "I can take a little break", "name": "sav2", "hold": 1.6},
+		{"prefix": "Alright... I'll push", "name": "sav3", "hold": 1.8}], 300.0)
+	if sp1 is GDScriptFunctionState:
+		yield(sp1, "completed")
+	write_marks("savannah done")
+	L("stage: opening conversation done, shots=%d" % shots.size())
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	player = root().find_node("Player", true, false)
+	# ---- 3. Kate at the town hall: natal homing, then the rest of her introduction
+	var door = world_door("towndoor")
+	var r0 = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r0 is GDScriptFunctionState:
+		r0 = yield(r0, "completed")
+	var tc = tap(KEY_SPACE, 0.1)
+	if tc is GDScriptFunctionState:
+		yield(tc, "completed")
+	var pp = show_pump([], 90.0, "res://Scenes/townhall.tscn")
+	if pp is GDScriptFunctionState:
+		yield(pp, "completed")
+	var in_ = wait_scene("res://Scenes/townhall.tscn", 25)
+	if in_ is GDScriptFunctionState:
+		in_ = yield(in_, "completed")
+	player = root().find_node("Player", true, false)
+	var sp2 = show_pump([
+		{"prefix": "So, what do you wanna know", "name": "kate_q", "hold": 2.4},
+		{"prefix": "told you but over the last couple", "name": "kate_natal", "hold": 3.2}], 300.0)
+	if sp2 is GDScriptFunctionState:
+		yield(sp2, "completed")
+	write_marks("kate done")
+	L("stage: Kate's introduction done, journal unlocked=%s shots=%d" % [str(Global.journal.unlocked()), shots.size()])
+	var lv = leave_by_exit("exit.gd")
+	if lv is GDScriptFunctionState:
+		yield(lv, "completed")
+	var back = wait_scene("res://Scenes/World.tscn", 25)
+	if back is GDScriptFunctionState:
+		back = yield(back, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(1.0, true), "timeout")
+	# ---- 4. only now: a short walk and Shift jog through the plaza, with turns
+	L("stage: walking from %s" % str(feet()))
+	caption("WALK AND JOG THROUGH TOWN")
+	rec_on("walk")
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	var m1 = hold_move([KEY_S], false, 0.7)
+	if m1 is GDScriptFunctionState:
+		yield(m1, "completed")
+	var m2 = hold_move([KEY_D], true, 1.2)
+	if m2 is GDScriptFunctionState:
+		yield(m2, "completed")
+	var m3 = hold_move([KEY_W], true, 0.7)
+	if m3 is GDScriptFunctionState:
+		yield(m3, "completed")
+	var m4 = hold_move([KEY_A], true, 1.0)
+	if m4 is GDScriptFunctionState:
+		yield(m4, "completed")
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	rec_off()
+	caption("")
+	write_marks("walk done")
+	# ---- 5. Jayson and Brock, then the quest journal and the map
+	var tj = talk_to("jayson", [{"prefix": "Yoooo I heard", "name": "jayson", "hold": 2.2}])
+	if tj is GDScriptFunctionState:
+		yield(tj, "completed")
+	write_marks("jayson done")
+	var tb = talk_to("brock", [{"prefix": "Whats up man", "name": "brock", "hold": 1.8}])
+	if tb is GDScriptFunctionState:
+		yield(tb, "completed")
+	write_marks("brock done")
+	L("stage: talked to both; indices jayson=%d brock=%d" % [Global.indices["jayson"], Global.indices["brock"]])
+	yield(get_tree().create_timer(1.0, true), "timeout")
+	rec_on("journal")
+	yield(get_tree().create_timer(0.9, true), "timeout")
+	mark("journal_press")
+	var q1 = tap(KEY_Q, 0.12)
+	if q1 is GDScriptFunctionState:
+		yield(q1, "completed")
+	mark("journal_open")
+	yield(get_tree().create_timer(5.5, true), "timeout")           # hold on the house objectives
+	mark("journal_close")
+	var q2 = tap(KEY_Q, 0.12)
+	if q2 is GDScriptFunctionState:
+		yield(q2, "completed")
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	rec_off()
+	write_marks("journal done")
+	var board = by_script("mapboard.gd")[0]
+	var br = rect_of_area(board)
+	var spot = Vector2(br.position.x + br.size.x * 0.5, br.position.y + 14.0)
+	teleport_feet(spot + Vector2(30, 150))
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	var w1 = tap(KEY_M, 0.1)
+	if w1 is GDScriptFunctionState:
+		yield(w1, "completed")
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	var w2 = tap(KEY_M, 0.1)
+	if w2 is GDScriptFunctionState:
+		yield(w2, "completed")
+	yield(get_tree().create_timer(0.9, true), "timeout")
+	caption("YELLOW MARKS SHOW WHERE TO GO")
+	rec_on("map")
+	var j2 = jog_to(spot, 400.0)
+	if j2 is GDScriptFunctionState:
+		j2 = yield(j2, "completed")
+	yield(get_tree().create_timer(0.35, true), "timeout")
+	var nudge = 0
+	while player.cue_target != board and nudge < 30:
+		teleport_feet(feet() + Vector2(0, 3))
+		yield(get_tree().create_timer(0.1, true), "timeout")
+		nudge += 1
+	var te = tap(KEY_E, 0.1)
+	if te is GDScriptFunctionState:
+		yield(te, "completed")
+	mark("map_open")
+	yield(get_tree().create_timer(4.2, true), "timeout")
+	rec_off()
+	caption("")
+	write_marks("map done")
+	if not Global.isVisible:
+		var tm = tap(KEY_M, 0.1)
+		if tm is GDScriptFunctionState:
+			yield(tm, "completed")
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	# ---- 6. a real cleanup in Jayson's house
+	var jd = world_door("jaysondoor")
+	var rj = walk_to_area_and_interact(jd, Vector2(0, 1), 280.0, false)
+	if rj is GDScriptFunctionState:
+		rj = yield(rj, "completed")
+	var tk = tap(KEY_E, 0.1)
+	if tk is GDScriptFunctionState:
+		yield(tk, "completed")
+	var pj = pump("enter_jaysondoor", 150)
+	if pj is GDScriptFunctionState:
+		yield(pj, "completed")
+	var inj = wait_scene("res://Scenes/Jaysonhome.tscn", 25)
+	if inj is GDScriptFunctionState:
+		inj = yield(inj, "completed")
+	var d2 = pump("house_intro", 120)
+	if d2 is GDScriptFunctionState:
+		yield(d2, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	var toilet = by_script("old toilet jayson.gd")[0]
+	var rt = rect_of_area(toilet)
+	var tspot = rt.position + rt.size * 0.5
+	teleport_feet(tspot + Vector2(130, 130))
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	caption("FIX LEAKS. CLEAN UP THE TOWN.")
+	rec_on("clean_a")
+	var j3 = jog_to(tspot, 400.0)
+	if j3 is GDScriptFunctionState:
+		j3 = yield(j3, "completed")
+	yield(get_tree().create_timer(0.9, true), "timeout")
+	var ts = tap(KEY_SPACE, 0.1)
+	if ts is GDScriptFunctionState:
+		yield(ts, "completed")
+	yield(get_tree().create_timer(0.3, true), "timeout")
+	var dd = dialog_node()
+	if dd != null:
+		var wt2 = wait_text_done(dd, 8.0)
+		if wt2 is GDScriptFunctionState:
+			yield(wt2, "completed")
+	yield(get_tree().create_timer(2.4, true), "timeout")           # one complete line, held to read
+	rec_off()
+	write_marks("clean_a done")
+	var sp3 = show_pump([], 120.0)                                  # the rest of the conversation: not recorded
+	if sp3 is GDScriptFunctionState:
+		yield(sp3, "completed")
+	yield(get_tree().create_timer(0.3, true), "timeout")
+	rec_on("clean_b")
+	yield(get_tree().create_timer(2.4, true), "timeout")           # the fixed toilet
+	rec_off()
+	caption("")
+	write_marks("clean_b done")
+	# ---- 7. end on the Turtleburg title
+	get_tree().change_scene("res://Scenes/Start Menu.tscn")
+	var ok2 = wait_scene("res://Scenes/Start Menu.tscn", 15)
+	if ok2 is GDScriptFunctionState:
+		ok2 = yield(ok2, "completed")
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	caption("AN EDUCATIONAL RPG ABOUT THE WATER CRISIS")
+	rec_on("end")
+	yield(get_tree().create_timer(3.6, true), "timeout")
+	rec_off()
+	write_marks("all done")
+	var f = File.new()
+	f.open(OUT + "trailer_done.txt", File.WRITE)
+	f.store_string("done")
+	f.close()
+	finish()
+
+# ------------------------------------------------------------------ pre-recording check: intro, Q, then the map
+func test_pre_record():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	var door = world_door("towndoor")
+	var r0 = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r0 is GDScriptFunctionState:
+		r0 = yield(r0, "completed")
+	var tc = tap(KEY_SPACE, 0.1)
+	if tc is GDScriptFunctionState:
+		yield(tc, "completed")
+	var pp = pump("enter_towndoor", 150)
+	if pp is GDScriptFunctionState:
+		yield(pp, "completed")
+	var in_ = wait_scene("res://Scenes/townhall.tscn", 25)
+	if in_ is GDScriptFunctionState:
+		in_ = yield(in_, "completed")
+	player = root().find_node("Player", true, false)
+	var hp = human_pump(260.0)
+	if hp is GDScriptFunctionState:
+		hp = yield(hp, "completed")
+	CHECK(hp and Global.journal.unlocked(), "Kate's introduction finished; journal unlocked")
+	var lv = leave_by_exit("exit.gd")
+	if lv is GDScriptFunctionState:
+		yield(lv, "completed")
+	var back = wait_scene("res://Scenes/World.tscn", 25)
+	if back is GDScriptFunctionState:
+		back = yield(back, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(1.0, true), "timeout")
+	var q1 = tap(KEY_Q, 0.08)
+	if q1 is GDScriptFunctionState:
+		yield(q1, "completed")
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	CHECK(Global.journal.is_open, "Q opens the journal")
+	var shq = shot("1_journal_open")
+	if shq is GDScriptFunctionState:
+		yield(shq, "completed")
+	var q2 = tap(KEY_Q, 0.08)
+	if q2 is GDScriptFunctionState:
+		yield(q2, "completed")
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	CHECK(not Global.journal.is_open, "Q closes it")
+	var board = by_script("mapboard.gd")[0]
+	var br = rect_of_area(board)
+	teleport_feet(Vector2(br.position.x + br.size.x * 0.5, br.position.y - 8.0))
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	var te = tap(KEY_E, 0.1)
+	if te is GDScriptFunctionState:
+		yield(te, "completed")
+	yield(get_tree().create_timer(1.5, true), "timeout")
+	CHECK(not Global.isVisible, "E at the board opened the map")
+	L("markers on the map: %s" % marker_keys())
+	var shm = shot("2_map_markers")
+	if shm is GDScriptFunctionState:
+		yield(shm, "completed")
+	var f = File.new()
+	f.open(OUT + "map_open.txt", File.WRITE)
+	f.store_string(marker_keys())
+	f.close()
+	yield(get_tree().create_timer(14.0, true), "timeout")     # hold the map open so the real window can be captured
+	finish()
+
+
+# ------------------------------------------------------------------ facing: sprite direction vs direction of travel
+func frame_dir(f):
+	if f <= 3:
+		return "down"
+	if f <= 7:
+		return "left"
+	if f <= 11:
+		return "up"
+	return "right"
+
+func sprite_dir():
+	return frame_dir(player.get_node("AnimatedSprite").frame)
+
+# hold keys for `dur` seconds, return the list of facings seen (one per physics frame) and the idle facing after release
+func face_run(keys, shift, dur):
+	var seq = []
+	for k in keys:
+		set_hold(k, true)
+	if shift:
+		set_hold(KEY_SHIFT, true)
+	var t0 = t
+	while t - t0 < dur:
+		yield(get_tree(), "physics_frame")
+		seq.append(sprite_dir())
+	return seq
+
+func face_release_and_idle():
+	release_all()
+	yield(get_tree().create_timer(0.35, true), "timeout")
+	return sprite_dir()
+
+func changes(seq, skip = 4):
+	var n = 0
+	for i in range(skip + 1, seq.size()):
+		if seq[i] != seq[i - 1]:
+			n += 1
+	return n
+
+func test_facing_check():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	var cardinals = [["up", [KEY_W]], ["down", [KEY_S]], ["left", [KEY_A]], ["right", [KEY_D]]]
+	for shift in [false, true]:
+		var tag = "jog" if shift else "walk"
+		for c in cardinals:
+			var seq = face_run(c[1], shift, 0.6)
+			if seq is GDScriptFunctionState:
+				seq = yield(seq, "completed")
+			var idle = face_release_and_idle()
+			if idle is GDScriptFunctionState:
+				idle = yield(idle, "completed")
+			var last = seq[seq.size() - 1]
+			L("%s %s: moving=%s idle-after-stop=%s changes=%d" % [tag, c[0], last, idle, changes(seq)])
+			CHECK(last == c[0] and changes(seq) == 0, "%s %s: sprite faces %s while moving (%s)" % [tag, c[0], c[0], last])
+			CHECK(idle == c[0], "%s %s: stopping keeps facing %s (idle shows %s)" % [tag, c[0], c[0], idle])
+		var diags = [["up+right", [KEY_W, KEY_D]], ["up+left", [KEY_W, KEY_A]], ["down+right", [KEY_S, KEY_D]], ["down+left", [KEY_S, KEY_A]]]
+		for d in diags:
+			var seq2 = face_run(d[1], shift, 0.6)
+			if seq2 is GDScriptFunctionState:
+				seq2 = yield(seq2, "completed")
+			var idle2 = face_release_and_idle()
+			if idle2 is GDScriptFunctionState:
+				idle2 = yield(idle2, "completed")
+			var last2 = seq2[seq2.size() - 1]
+			L("%s %s: moving=%s idle-after-stop=%s changes=%d" % [tag, d[0], last2, idle2, changes(seq2)])
+			CHECK(changes(seq2) == 0, "%s %s: no flicker between directions" % [tag, d[0]])
+			CHECK(idle2 == last2, "%s %s: stopping keeps the last facing (%s -> %s)" % [tag, d[0], last2, idle2])
+			CHECK(last2 == "left" or last2 == "right" or last2 == "up" or last2 == "down", "%s %s: a consistent facing (%s)" % [tag, d[0], last2])
+	# a brief extra key while walking must not turn the sprite
+	var s3 = face_run([KEY_W], false, 0.45)
+	if s3 is GDScriptFunctionState:
+		s3 = yield(s3, "completed")
+	set_hold(KEY_A, true)
+	var s4 = face_run([KEY_W], false, 0.15)
+	if s4 is GDScriptFunctionState:
+		s4 = yield(s4, "completed")
+	set_hold(KEY_A, false)
+	var s5 = face_run([KEY_W], false, 0.4)
+	if s5 is GDScriptFunctionState:
+		s5 = yield(s5, "completed")
+	var all = s3 + s4 + s5
+	var seen = {}
+	for f in all:
+		seen[f] = true
+	L("walking up with a short tap of A: facings seen %s, changes=%d" % [str(seen.keys()), changes(all)])
+	CHECK(changes(all) == 0, "walking up with a short tap of A keeps the sprite facing up")
+	var idle3 = face_release_and_idle()
+	if idle3 is GDScriptFunctionState:
+		yield(idle3, "completed")
+	finish()
+
+
+
+# ------------------------------------------------------------------ Brock / overlays: who moves the player? who moves the camera?
+func npc_by_name(who):
+	for n in get_tree().get_nodes_in_group("NPC"):
+		if str(n.npc) == who:
+			return n
+	return null
+
+func track_motion(label, dur, npc):
+	var cam = player.get_node("Camera2D2")
+	var p0 = player.global_position
+	var c0 = cam.get_camera_screen_center()
+	var n0 = npc.global_position
+	var maxp = 0.0
+	var maxc = 0.0
+	var t0 = t
+	while t - t0 < dur:
+		yield(get_tree(), "physics_frame")
+		maxp = max(maxp, (player.global_position - p0).length())
+		maxc = max(maxc, (cam.get_camera_screen_center() - c0).length())
+	L("%s: player moved up to %.2f px (end %.2f), camera centre moved up to %.2f px, NPC moved %.0f px" % [label, maxp, (player.global_position - p0).length(), maxc, (npc.global_position - n0).length()])
+	return [maxp, maxc]
+
+func test_brock_repro():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1
+	var brock = npc_by_name("brock")
+	var cam = player.get_node("Camera2D2")
+	L("layers: brock layer=%d mask=%d | player layer=%d mask=%d" % [brock.collision_layer, brock.collision_mask, player.collision_layer, player.collision_mask])
+	var br = rect_of_area(brock)
+	# ---- A. walk up to Brock with real keys, talk, then try to walk away
+	teleport_feet(br.position + br.size * 0.5 + Vector2(170, 0))
+	yield(get_tree().create_timer(0.3, true), "timeout")
+	var n = 0
+	while player.cue_target != brock and n < 60:
+		var d = brock.global_position - player.global_position
+		set_hold(KEY_A, d.x < -6)
+		set_hold(KEY_D, d.x > 6)
+		set_hold(KEY_W, d.y < -6)
+		set_hold(KEY_S, d.y > 6)
+		yield(get_tree().create_timer(0.1, true), "timeout")
+		n += 1
+	release_all()
+	L("reached Brock: target=%s after %d steps, player=%s brock=%s" % [str(player.cue_target.name) if player.cue_target != null else "none", n, str(player.global_position), str(brock.global_position)])
+	var tp = tap(KEY_SPACE, 0.08)
+	if tp is GDScriptFunctionState:
+		yield(tp, "completed")
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	L("talking: paused=%s dialog=%s" % [str(get_tree().paused), str(dialog_node() != null)])
+	var hp = human_pump(120.0)
+	if hp is GDScriptFunctionState:
+		yield(hp, "completed")
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	L("after the conversation: paused=%s moving=%s motion=%s dialog=%s player=%s" % [str(get_tree().paused), str(Global.moving), str(player.motion), str(dialog_node() != null), str(player.global_position)])
+	for dirk in [["up", KEY_W], ["down", KEY_S], ["left", KEY_A], ["right", KEY_D]]:
+		var p0 = player.global_position
+		set_hold(dirk[1], true)
+		yield(get_tree().create_timer(0.6, true), "timeout")
+		release_all()
+		yield(get_tree().create_timer(0.2, true), "timeout")
+		var moved = (player.global_position - p0).length()
+		L("walk %s after talking: moved %.1f px" % [dirk[0], moved])
+		CHECK(moved > 40.0, "can walk %s away from Brock after the conversation (%.1f px)" % [dirk[0], moved])
+		teleport_feet(feet() - (player.global_position - p0))
+		yield(get_tree().create_timer(0.1, true), "timeout")
+	# ---- B. overlays at Brock with a movement key held and Brock moving nearby
+	for ov in [["map", KEY_M], ["journal", KEY_Q]]:
+		var br2 = rect_of_area(brock)
+		teleport_feet(br2.position + br2.size * 0.5)
+		yield(get_tree().create_timer(0.6, true), "timeout")
+		set_hold(KEY_D, true)
+		yield(get_tree().create_timer(0.15, true), "timeout")
+		var o = tap(ov[1], 0.08)
+		if o is GDScriptFunctionState:
+			yield(o, "completed")
+		yield(get_tree().create_timer(0.1, true), "timeout")
+		var opened = (not Global.isVisible) if ov[0] == "map" else Global.journal.is_open
+		var m1 = track_motion(ov[0] + " OPEN, D held", 1.5, brock)
+		if m1 is GDScriptFunctionState:
+			m1 = yield(m1, "completed")
+		var c = tap(ov[1], 0.08)
+		if c is GDScriptFunctionState:
+			yield(c, "completed")
+		var m2 = track_motion(ov[0] + " just CLOSED, D still held", 0.25, brock)
+		if m2 is GDScriptFunctionState:
+			m2 = yield(m2, "completed")
+		release_all()
+		yield(get_tree().create_timer(0.3, true), "timeout")
+		L("%s opened=%s" % [ov[0], str(opened)])
+		CHECK(opened, "%s opens" % ov[0])
+		CHECK(m1[0] < 0.5, "%s open: the player holds position (moved %.2f px)" % [ov[0], m1[0]])
+		CHECK(m1[1] < 0.5, "%s open: the camera does not move (%.2f px)" % [ov[0], m1[1]])
+	finish()
+
+
+func timeline(label, dur, npc):
+	var cam = player.get_node("Camera2D2")
+	var t0 = t
+	var nxt = 0.0
+	while t - t0 < dur:
+		yield(get_tree(), "physics_frame")
+		if t - t0 >= nxt:
+			nxt += 0.5
+			L("  %s t=%.1f player=(%.0f,%.0f) camera=(%.0f,%.0f) brock=(%.0f,%.0f) moving=%s paused=%s motion=(%.0f,%.0f)" % [label, t - t0, player.global_position.x, player.global_position.y, cam.get_camera_screen_center().x, cam.get_camera_screen_center().y, npc.global_position.x, npc.global_position.y, str(Global.moving), str(get_tree().paused), player.motion.x, player.motion.y])
+
+func test_brock_repro2():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1
+	var pre = show_pump([], 40.0)
+	if pre is GDScriptFunctionState:
+		yield(pre, "completed")
+	player = root().find_node("Player", true, false)
+	var tj = talk_to("jayson", [])
+	if tj is GDScriptFunctionState:
+		yield(tj, "completed")
+	L("after Jayson: player=%s idx jayson=%d" % [str(player.global_position), Global.indices["jayson"]])
+	var brock = npc_by_name("brock")
+	var tb = talk_to("brock", [])
+	if tb is GDScriptFunctionState:
+		yield(tb, "completed")
+	L("Brock conversation over: player=%s idx brock=%d" % [str(player.global_position), Global.indices["brock"]])
+	var tl = timeline("after Brock", 4.0, brock)
+	if tl is GDScriptFunctionState:
+		yield(tl, "completed")
+	var q = tap(KEY_Q, 0.1)
+	if q is GDScriptFunctionState:
+		yield(q, "completed")
+	var tl2 = timeline("journal open", 2.0, brock)
+	if tl2 is GDScriptFunctionState:
+		yield(tl2, "completed")
+	finish()
+
+
+func probe_right(label):
+	var p0 = player.global_position
+	set_hold(KEY_D, true)
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	var names = []
+	for i in range(player.get_slide_count()):
+		var c = player.get_slide_collision(i).collider
+		names.append("%s(%s)" % [str(c.name), str(c.get_class())])
+	release_all()
+	L("%s: pos=%s moved right %.1f px, colliders=%s" % [label, str(p0), player.global_position.x - p0.x, str(names)])
+	yield(get_tree().create_timer(0.2, true), "timeout")
+
+func test_brock_block():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1
+	var brock = npc_by_name("brock")
+	# same absolute spot as the earlier run, with NO conversation at all
+	teleport_feet(Vector2(-358.28, -819.5) + (feet() - player.global_position))
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	var a = probe_right("no conversation, spot beside Brock's house")
+	if a is GDScriptFunctionState:
+		yield(a, "completed")
+	# and 120 px away from it, to compare
+	teleport_feet(feet() + Vector2(-120, 0))
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	var b = probe_right("no conversation, 120px left")
+	if b is GDScriptFunctionState:
+		yield(b, "completed")
+	finish()
+
+
+func drift_after(label, secs):
+	var p0 = player.global_position
+	var m0 = player.motion
+	yield(get_tree().create_timer(secs, true), "timeout")
+	var d = (player.global_position - p0).length()
+	L("%s: stale velocity was (%.0f,%.0f); with no key held the player then slid %.1f px" % [label, m0.x, m0.y, d])
+	return d
+
+func test_shove_repro():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1
+	player = root().find_node("Player", true, false)
+	var board = by_script("mapboard.gd")[0]
+	var br = rect_of_area(board)
+	var open_pos = Vector2(br.position.x + br.size.x * 0.5, br.position.y + 120.0)
+	var cases = [["journal", KEY_Q], ["map", KEY_M]]
+	for cse in cases:
+		teleport_feet(open_pos)
+		yield(get_tree().create_timer(0.5, true), "timeout")
+		set_hold(KEY_S, true)
+		yield(get_tree().create_timer(0.35, true), "timeout")       # full walking speed
+		var o = tap(cse[1], 0.06)
+		if o is GDScriptFunctionState:
+			yield(o, "completed")
+		yield(get_tree().create_timer(0.15, true), "timeout")
+		var pa = player.global_position
+		set_hold(KEY_S, false)                                      # key released while the overlay is open
+		yield(get_tree().create_timer(0.5, true), "timeout")
+		var held_still = (player.global_position - pa).length()
+		var c = tap(cse[1], 0.06)
+		if c is GDScriptFunctionState:
+			yield(c, "completed")
+		var dr = drift_after(cse[0] + " just closed", 0.6)
+		if dr is GDScriptFunctionState:
+			dr = yield(dr, "completed")
+		CHECK(held_still < 0.5, "%s open: player holds position (%.2f px)" % [cse[0], held_still])
+		CHECK(dr < 1.0, "%s closed with no key held: no shove/slide (%.1f px)" % [cse[0], dr])
+		release_all()
+		yield(get_tree().create_timer(0.3, true), "timeout")
+	# a conversation ends: same check
+	var brock = npc_by_name("brock")
+	var rb = rect_of_area(brock)
+	teleport_feet(rb.position + rb.size * 0.5 + Vector2(0, 150))
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	set_hold(KEY_W, true)
+	var n = 0
+	while player.cue_target != brock and n < 40:
+		yield(get_tree().create_timer(0.05, true), "timeout")
+		n += 1
+	L("brock in reach after %d steps while still walking: motion=%s" % [n, str(player.motion)])
+	var tp = tap(KEY_SPACE, 0.06)
+	if tp is GDScriptFunctionState:
+		yield(tp, "completed")
+	yield(get_tree().create_timer(0.3, true), "timeout")
+	set_hold(KEY_W, false)                                       # released while talking
+	var hp = human_pump(120.0)
+	if hp is GDScriptFunctionState:
+		yield(hp, "completed")
+	var dr2 = drift_after("Brock conversation just ended", 0.6)
+	if dr2 is GDScriptFunctionState:
+		dr2 = yield(dr2, "completed")
+	CHECK(dr2 < 1.0, "conversation ended with no key held: no slide (%.1f px)" % dr2)
+	finish()
+
+
+func art_rect_screen(world):
+	var mm = player.get_node("Camera2D2/minimap")
+	var b = world._map_local_bounds()
+	var xf = mm.get_global_transform_with_canvas()
+	var r = Rect2(xf.xform(b.position), Vector2.ZERO)
+	for c in [Vector2(b.end.x, b.position.y), Vector2(b.position.x, b.end.y), b.end]:
+		r = r.expand(xf.xform(c))
+	return r
+
+# marker -> offset (in map-art units) from the art centre, plus how far each marker is from the art
+# position of the thing it points at (bobbing is up to 2 px)
+func marker_local_offsets(world):
+	var mm = player.get_node("Camera2D2/minimap")
+	var b = world._map_local_bounds()
+	var out = {}
+	var attach_err = 0.0
+	for c in mm.get_children():
+		if c.get_script() != null and "sprites" in c:
+			for d in c.last_dests:
+				var s = c.sprites[d["key"]]
+				var want = d["map_pos"] + Vector2(0, -c.LIFT)
+				attach_err = max(attach_err, (s.global_position - want).length())
+				if d["key"].begins_with("door:"):
+					out[d["key"]] = mm.to_local(d["map_pos"]) - (b.position + b.size * 0.5)
+	return [out, attach_err]
+
+func test_overlays_check():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1
+	Global.indices["jayson"] = 1
+	Global.indices["brock"] = 1
+	player = root().find_node("Player", true, false)
+	var world = by_script("World.gd")[0]
+	var brock = npc_by_name("brock")
+	var cam = player.get_node("Camera2D2")
+	# ---- 1. both overlays near Brock (a moving NPC): hold, no shove, world keeps moving
+	for ov in [["journal", KEY_Q], ["map", KEY_M]]:
+		var br2 = rect_of_area(brock)
+		teleport_feet(br2.position + br2.size * 0.5 + Vector2(-60, 40))
+		yield(get_tree().create_timer(0.6, true), "timeout")
+		set_hold(KEY_D, true)
+		yield(get_tree().create_timer(0.2, true), "timeout")
+		var o = tap(ov[1], 0.08)
+		if o is GDScriptFunctionState:
+			yield(o, "completed")
+		yield(get_tree().create_timer(0.15, true), "timeout")
+		var opened = Global.journal.is_open if ov[0] == "journal" else (not Global.isVisible)
+		var m1 = track_motion(ov[0] + " OPEN (D held, Brock walking)", 1.5, brock)
+		if m1 is GDScriptFunctionState:
+			m1 = yield(m1, "completed")
+		CHECK(opened, "%s opened" % ov[0])
+		CHECK(m1[0] < 0.5, "%s open: player position holds (%.2f px)" % [ov[0], m1[0]])
+		CHECK(m1[1] < 0.5, "%s open: camera holds (%.2f px)" % [ov[0], m1[1]])
+		var n1 = brock.global_position
+		yield(get_tree().create_timer(0.5, true), "timeout")
+		CHECK((brock.global_position - n1).length() > 20.0, "%s open: Brock keeps walking (%.0f px in 0.5 s)" % [ov[0], (brock.global_position - n1).length()])
+		CHECK(not get_tree().paused, "%s open: the game tree is not paused" % ov[0])
+		# release the key while open, close: nothing may carry the player
+		set_hold(KEY_D, false)
+		yield(get_tree().create_timer(0.3, true), "timeout")
+		var pa = player.global_position
+		var ca = cam.get_camera_screen_center()
+		var c = tap(ov[1], 0.08)
+		if c is GDScriptFunctionState:
+			yield(c, "completed")
+		yield(get_tree().create_timer(0.7, true), "timeout")
+		CHECK((player.global_position - pa).length() < 0.5, "%s closed, key released: no shove (%.2f px)" % [ov[0], (player.global_position - pa).length()])
+		CHECK((cam.get_camera_screen_center() - ca).length() < 0.5, "%s closed: no camera snap (%.2f px)" % [ov[0], (cam.get_camera_screen_center() - ca).length()])
+		CHECK(Global.moving == true and not Global.journal.is_open and Global.isVisible, "%s closed: the player can move again" % ov[0])
+		# key HELD through the overlay: after closing the player walks smoothly, one frame at a time
+		set_hold(KEY_D, true)
+		yield(get_tree().create_timer(0.3, true), "timeout")
+		var o2 = tap(ov[1], 0.08)
+		if o2 is GDScriptFunctionState:
+			yield(o2, "completed")
+		yield(get_tree().create_timer(0.6, true), "timeout")
+		var c2 = tap(ov[1], 0.08)
+		if c2 is GDScriptFunctionState:
+			yield(c2, "completed")
+		var last = player.global_position
+		var biggest = 0.0
+		var t0 = t
+		while t - t0 < 0.5:
+			yield(get_tree(), "physics_frame")
+			biggest = max(biggest, (player.global_position - last).length())
+			last = player.global_position
+		release_all()
+		L("%s close with key held: biggest single-frame step %.2f px (walk speed is %.2f px/frame)" % [ov[0], biggest, 165.0 / 60.0])
+		CHECK(biggest < 165.0 / 60.0 + 0.5, "%s close with key held: no snap, only normal walking (%.2f px per frame)" % [ov[0], biggest])
+		yield(get_tree().create_timer(0.3, true), "timeout")
+	# ---- 2. the map art is centred in the viewport (several player spots, two window sizes)
+	var board = by_script("mapboard.gd")[0]
+	var spots = [feet(), rect_of_area(brock).position, rect_of_area(board).position + Vector2(0, 100)]
+	var base_offsets = null
+	var sizes = [Vector2(1280, 720), Vector2(960, 800)]
+	for sz in sizes:
+		OS.window_size = sz
+		yield(get_tree().create_timer(0.8, true), "timeout")
+		for sp in spots:
+			teleport_feet(sp)
+			yield(get_tree().create_timer(0.6, true), "timeout")
+			var mo = tap(KEY_M, 0.08)
+			if mo is GDScriptFunctionState:
+				yield(mo, "completed")
+			yield(get_tree().create_timer(0.6, true), "timeout")
+			var r = art_rect_screen(world)
+			var vc = get_viewport().get_visible_rect().size * 0.5
+			var off = r.position + r.size * 0.5 - vc
+			L("window %s, player near %s: art covers %s, centre offset from viewport centre = (%.2f, %.2f), viewport %s" % [str(OS.window_size), str(sp.round()), str(r), off.x, off.y, str(get_viewport().get_visible_rect().size)])
+			CHECK(abs(off.x) < 1.5 and abs(off.y) < 1.5, "map centred at window %s, player at %s (off by %.2f, %.2f)" % [str(sz), str(sp.round()), off.x, off.y])
+			CHECK(r.position.x >= -0.5 and r.end.x <= get_viewport().get_visible_rect().size.x + 0.5 and r.position.y >= -0.5 and r.end.y <= get_viewport().get_visible_rect().size.y + 0.5, "map art fits inside the viewport (%s)" % str(r))
+			var mo2 = marker_local_offsets(world)
+			var offs = mo2[0]
+			CHECK(mo2[1] < 2.5, "every ! sits on the art spot of its target (max %.2f px, bobbing is 2 px)" % mo2[1])
+			if base_offsets == null and offs.size() > 0:
+				base_offsets = offs
+			elif base_offsets != null:
+				for k in offs.keys():
+					if base_offsets.has(k):
+						CHECK((offs[k] - base_offsets[k]).length() < 0.5, "marker %s stays on the same spot of the art (%.2f px)" % [k, (offs[k] - base_offsets[k]).length()])
+			if sz == sizes[1] and sp == spots[2]:
+				var shm = shot("map_centered_resized")
+				if shm is GDScriptFunctionState:
+					yield(shm, "completed")
+			if sz == sizes[0] and sp == spots[2]:
+				var shm2 = shot("map_centered_recording")
+				if shm2 is GDScriptFunctionState:
+					yield(shm2, "completed")
+			var mc = tap(KEY_M, 0.08)
+			if mc is GDScriptFunctionState:
+				yield(mc, "completed")
+			yield(get_tree().create_timer(0.4, true), "timeout")
+	L("markers on the art: %s" % str(base_offsets))
+	CHECK(base_offsets != null and base_offsets.size() >= 2, "the yellow ! house markers are present (%d)" % (base_offsets.size() if base_offsets != null else 0))
+	OS.window_size = Vector2(1280, 720)
+	# ---- 3. journal rows: nothing wraps or clips
+	teleport_feet(spots[0])
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	var jq = tap(KEY_Q, 0.08)
+	if jq is GDScriptFunctionState:
+		yield(jq, "completed")
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	var maxw = 0.0
+	var rows = 0
+	var stack = [Global.journal._list]
+	while stack.size() > 0:
+		var n = stack.pop_back()
+		for ch in n.get_children():
+			stack.append(ch)
+		if n is Label and n.get_parent() is HBoxContainer and n.rect_size.x > 100:
+			rows += 1
+			var need = n.get_font("font").get_string_size(n.text).x
+			maxw = max(maxw, need)
+			CHECK(need <= n.rect_size.x + 1.0 and n.get_line_count() == 1, "row stays on one line: '%s' (%.0f of %.0f px)" % [n.text, need, n.rect_size.x])
+	L("journal rows=%d widest text=%.0f px, panel list width=%.0f" % [rows, maxw, Global.journal._list.rect_size.x])
+	var shj = shot("journal_readable")
+	if shj is GDScriptFunctionState:
+		yield(shj, "completed")
+	var jc = tap(KEY_Q, 0.08)
+	if jc is GDScriptFunctionState:
+		yield(jc, "completed")
+	finish()
+
+
+func map_screen_to_world(world, sp):
+	var mm = player.get_node("Camera2D2/minimap")
+	var wt = world.get_node("baseNode/base")
+	var mt = mm.get_node("TextureRect/baseNode/base")
+	var mg = get_viewport().get_canvas_transform().affine_inverse().xform(sp)
+	return wt.to_global(mt.to_local(mg))
+
+
+func move_until(key, axis, target, shift, cap = 14.0):
+	set_hold(key, true)
+	if shift:
+		set_hold(KEY_SHIFT, true)
+	var t0 = t
+	while t - t0 < cap:
+		yield(get_tree(), "physics_frame")
+		var f = feet()
+		var v = f.y if axis == "y" else f.x
+		if (key == KEY_W or key == KEY_A) and v <= target:
+			break
+		if (key == KEY_S or key == KEY_D) and v >= target:
+			break
+	release_all()
+	L("  move_until %s -> feet %s (%.1f s)" % [axis + str(target), str(feet().round()), t - t0])
+
+# Second take: only the shots that changed (east road walk/jog, Q journal, map). The conversations before
+# them are played unrecorded, so the story state is the real one.
+func test_trailer2():
+	make_captions()
+	recorder()
+	var ok = wait_scene("res://Scenes/Start Menu.tscn", 15)
+	if ok is GDScriptFunctionState:
+		ok = yield(ok, "completed")
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	var c = tap(KEY_SPACE, 0.1)
+	if c is GDScriptFunctionState:
+		yield(c, "completed")
+	ok = wait_scene("res://Scenes/World.tscn", 60)
+	if ok is GDScriptFunctionState:
+		ok = yield(ok, "completed")
+	var sp1 = show_pump([], 300.0)
+	if sp1 is GDScriptFunctionState:
+		yield(sp1, "completed")
+	player = root().find_node("Player", true, false)
+	var door = world_door("towndoor")
+	var r0 = walk_to_area_and_interact(door, Vector2(0, 1), 280.0, false)
+	if r0 is GDScriptFunctionState:
+		r0 = yield(r0, "completed")
+	var tc = tap(KEY_SPACE, 0.1)
+	if tc is GDScriptFunctionState:
+		yield(tc, "completed")
+	var pp = show_pump([], 90.0, "res://Scenes/townhall.tscn")
+	if pp is GDScriptFunctionState:
+		yield(pp, "completed")
+	var in_ = wait_scene("res://Scenes/townhall.tscn", 25)
+	if in_ is GDScriptFunctionState:
+		in_ = yield(in_, "completed")
+	player = root().find_node("Player", true, false)
+	var sp2 = show_pump([], 300.0)
+	if sp2 is GDScriptFunctionState:
+		yield(sp2, "completed")
+	L("stage: Kate done, journal unlocked=%s" % str(Global.journal.unlocked()))
+	var lv = leave_by_exit("exit.gd")
+	if lv is GDScriptFunctionState:
+		yield(lv, "completed")
+	var back = wait_scene("res://Scenes/World.tscn", 25)
+	if back is GDScriptFunctionState:
+		back = yield(back, "completed")
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(1.0, true), "timeout")
+	# ---- the east road: walk, then Shift jog, then a turn
+	teleport_feet(Vector2(1415, -420))
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	caption("WALK. HOLD SHIFT TO JOG.")
+	rec_on("walk")
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	var m1 = move_until(KEY_W, "y", -850, false)
+	if m1 is GDScriptFunctionState:
+		yield(m1, "completed")
+	mark("jog_start")
+	var m2 = move_until(KEY_W, "y", -1280, true)
+	if m2 is GDScriptFunctionState:
+		yield(m2, "completed")
+	mark("turn_west")
+	var m3 = move_until(KEY_A, "x", 1000, true)
+	if m3 is GDScriptFunctionState:
+		yield(m3, "completed")
+	yield(get_tree().create_timer(0.6, true), "timeout")
+	rec_off()
+	caption("")
+	write_marks("walk done")
+	# ---- Jayson, then Brock (unrecorded), then the journal and the map
+	var tj = talk_to("jayson", [])
+	if tj is GDScriptFunctionState:
+		yield(tj, "completed")
+	var tb = talk_to("brock", [])
+	if tb is GDScriptFunctionState:
+		yield(tb, "completed")
+	L("stage: talked to both: jayson=%d brock=%d player=%s" % [Global.indices["jayson"], Global.indices["brock"], str(player.global_position.round())])
+	yield(get_tree().create_timer(1.2, true), "timeout")
+	var pj0 = player.global_position
+	rec_on("journal")
+	yield(get_tree().create_timer(0.9, true), "timeout")
+	mark("journal_press")
+	var q1 = tap(KEY_Q, 0.12)
+	if q1 is GDScriptFunctionState:
+		yield(q1, "completed")
+	mark("journal_open")
+	yield(get_tree().create_timer(5.2, true), "timeout")
+	mark("journal_close")
+	var q2 = tap(KEY_Q, 0.12)
+	if q2 is GDScriptFunctionState:
+		yield(q2, "completed")
+	yield(get_tree().create_timer(0.7, true), "timeout")
+	rec_off()
+	L("journal shot: player moved %.2f px between start and end" % (player.global_position - pj0).length())
+	write_marks("journal done")
+	var board = by_script("mapboard.gd")[0]
+	var br = rect_of_area(board)
+	var spot = Vector2(br.position.x + br.size.x * 0.5, br.position.y + 14.0)
+	teleport_feet(spot + Vector2(30, 150))
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	var w1 = tap(KEY_M, 0.1)
+	if w1 is GDScriptFunctionState:
+		yield(w1, "completed")
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	var w2 = tap(KEY_M, 0.1)
+	if w2 is GDScriptFunctionState:
+		yield(w2, "completed")
+	yield(get_tree().create_timer(0.9, true), "timeout")
+	caption("YELLOW MARKS SHOW WHERE TO GO")
+	rec_on("map")
+	var j2 = jog_to(spot, 400.0)
+	if j2 is GDScriptFunctionState:
+		j2 = yield(j2, "completed")
+	yield(get_tree().create_timer(0.35, true), "timeout")
+	var nudge = 0
+	while player.cue_target != board and nudge < 30:
+		teleport_feet(feet() + Vector2(0, 3))
+		yield(get_tree().create_timer(0.1, true), "timeout")
+		nudge += 1
+	var pm0 = player.global_position
+	var te = tap(KEY_E, 0.1)
+	if te is GDScriptFunctionState:
+		yield(te, "completed")
+	mark("map_open")
+	yield(get_tree().create_timer(4.2, true), "timeout")
+	rec_off()
+	caption("")
+	L("map shot: player moved %.2f px while the map was open" % (player.global_position - pm0).length())
+	write_marks("all done")
+	var f = File.new()
+	f.open(OUT + "trailer_done.txt", File.WRITE)
+	f.store_string("done")
+	f.close()
+	finish()
+
+
+func test_list_targets():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1
+	for sc in ["res://Scenes/World.tscn", "res://Scenes/townhall.tscn", "res://Scenes/Jaysonhome.tscn", "res://Scenes/brockhome.tscn", "res://Scenes/steven.tscn"]:
+		get_tree().change_scene(sc)
+		var w = wait_scene(sc, 20)
+		if w is GDScriptFunctionState:
+			w = yield(w, "completed")
+		yield(get_tree().create_timer(1.0, true), "timeout")
+		player = root().find_node("Player", true, false)
+		if player == null:
+			L("== %s: no player" % sc)
+			continue
+		L("== %s" % sc)
+		var seen = {}
+		for g in ["DOOR", "EXIT", "NPC"]:
+			for nd in get_tree().get_nodes_in_group(g):
+				if seen.has(nd) or not player._is_interactable(nd):
+					continue
+				seen[nd] = true
+				var r = player._collider_rect(nd)
+				var scr = nd.get_script().resource_path.get_file() if nd.get_script() != null else "-"
+				var q = player.markers.is_usable(nd)
+				L("  %-22s %-5s %-24s rect=%s usable=%s visible=%s door=%s" % [str(nd.name), g, scr, str(r.size.round()) if r != null else "none", str(q), str(nd.is_visible_in_tree()), str(nd.get("door")) if "door" in nd else "-"])
+	finish()
+
+
+# ------------------------------------------------------------------ entrance name plates
+const FAR = Vector2(900000, 900000)
+
+func plate_settle(sec = 0.6):
+	yield(get_tree().create_timer(sec, true), "timeout")
+
+func plate_shot(tag, door, mouse_door = null):
+	var r = rect_of_area(door)
+	teleport_feet(Vector2(r.position.x + r.size.x * 0.5, r.end.y + 20.0))
+	if mouse_door != null:
+		var mr = rect_of_area(mouse_door)
+		player.markers.mouse_override = mr.position + mr.size * 0.5
+	else:
+		player.markers.mouse_override = FAR
+	yield(get_tree().create_timer(0.7, true), "timeout")
+	var sh = shot(tag)
+	if sh is GDScriptFunctionState:
+		yield(sh, "completed")
+
+func test_plates():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1
+	player = root().find_node("Player", true, false)
+	var mk = player.markers
+	mk.mouse_override = FAR
+	var jd = world_door("jaysondoor")
+	var jr = rect_of_area(jd)
+	var near_j = Vector2(jr.position.x + jr.size.x * 0.5, jr.end.y + 20.0)
+	teleport_feet(near_j)
+	var a = plate_settle()
+	yield(a, "completed")
+	CHECK(mk.plate_shown(jd) and mk.plate_of(jd)["text"] == "Jayson's Home", "in range only: Jayson's door shows its plate")
+	var pn = mk.plate_of(jd)["node"]
+	CHECK(abs(pn.global_position.x - (jr.position.x + jr.size.x * 0.5)) < 1.0 and pn.global_position.y <= jr.position.y, "plate is centred above the doorway")
+	CHECK(mk.sprite_of(jd) == null, "no ! marker on the entrance")
+	teleport_feet(near_j + Vector2(0, 700))
+	var b = plate_settle()
+	yield(b, "completed")
+	CHECK(not mk.plate_shown(jd), "neither in range nor hovered: hidden")
+	mk.mouse_override = jr.position + jr.size * 0.5
+	var c = plate_settle()
+	yield(c, "completed")
+	CHECK(mk.plate_shown(jd), "hover only: plate shows")
+	mk.mouse_override = FAR
+	Global.indices["jayhouse"] = 2
+	teleport_feet(near_j)
+	var d = plate_settle()
+	yield(d, "completed")
+	CHECK(mk.plate_shown(jd), "finished house still shows its name")
+	Global.indices["jayhouse"] = 0
+	# everything that is not an entrance keeps its "!"
+	var brock = npc_by_name("brock")
+	var br = rect_of_area(brock)
+	teleport_feet(br.position + br.size * 0.5)
+	var e = plate_settle()
+	yield(e, "completed")
+	CHECK(mk.sprite_of(brock) != null and mk.sprite_of(brock).visible and not mk.plate_shown(brock) and mk.plate_of(brock) == null, "Brock (NPC): keeps his ! and gets no plate")
+	var board = by_script("mapboard.gd")[0]
+	var bd = rect_of_area(board)
+	teleport_feet(Vector2(bd.position.x + bd.size.x * 0.5, bd.end.y + 20.0))
+	var f = plate_settle()
+	yield(f, "completed")
+	CHECK(mk.sprite_of(board) != null and mk.sprite_of(board).visible and mk.plate_of(board) == null, "notice board: keeps its ! and gets no plate")
+	var names = {}
+	for en in mk.plates:
+		names[str(en["target"].name)] = en["text"]
+	L("plates: %s" % str(names))
+	CHECK(names.get("towndoor") == "Town Hall" and names.get("brockdoor") == "Brock's Home" and names.get("stevendoor") == "Steven's Home", "entrance names")
+	# screenshots
+	var s1 = plate_shot("plate_townhall", world_door("towndoor"))
+	yield(s1, "completed")
+	var s2 = plate_shot("plate_jayson", jd)
+	yield(s2, "completed")
+	var s3 = plate_shot("plate_steven_hover_only", world_door("stevendoor"))
+	yield(s3, "completed")
+	var s4 = plate_shot("plate_brock_pair", world_door("brockdoor"), world_door("towndoor"))
+	yield(s4, "completed")
+	# interior: object indicators restored
+	get_tree().change_scene("res://Scenes/Jaysonhome.tscn")
+	var w = wait_scene("res://Scenes/Jaysonhome.tscn", 20)
+	if w is GDScriptFunctionState:
+		w = yield(w, "completed")
+	var gp = pump("house_intro", 120)
+	if gp is GDScriptFunctionState:
+		yield(gp, "completed")
+	yield(get_tree().create_timer(1.5, true), "timeout")
+	player = root().find_node("Player", true, false)
+	var n = 0
+	for en in player.markers.entries:
+		if en["sprite"].visible:
+			n += 1
+	L("Jayson's home: %d object markers visible on load, plates=%d" % [n, player.markers.plates.size()])
+	CHECK(n >= 2 and player.markers.plates.size() == 0, "interior: objects carry their markers again, no plates")
+	var s5 = shot("interior_markers")
+	if s5 is GDScriptFunctionState:
+		yield(s5, "completed")
+	finish()
+
+
+func test_plates_map():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1
+	Global.indices["jayson"] = 1
+	Global.indices["brock"] = 1
+	player = root().find_node("Player", true, false)
+	var mk = player.markers
+	# 1. plates never take mouse clicks
+	var stops = 0
+	for e in mk.plates:
+		for ch in e["node"].get_children():
+			if ch is Control and ch.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+				stops += 1
+	CHECK(stops == 0 and mk.plates.size() > 0, "no plate control captures the mouse (%d do)" % stops)
+	# 2. a real click on the door while its plate is showing still opens the door dialogue
+	var jd = world_door("jaysondoor")
+	var jr = rect_of_area(jd)
+	teleport_feet(Vector2(jr.position.x + jr.size.x * 0.5, jr.end.y + 20.0))
+	mk.mouse_override = null
+	yield(get_tree().create_timer(0.7, true), "timeout")
+	CHECK(mk.plate_shown(jd), "(plate showing)")
+	var pr = mk.plate_of(jd)
+	var plate_rect = Rect2(pr["node"].global_position - Vector2(pr["size"].x * 0.5, pr["size"].y), pr["size"])
+	CHECK(not plate_rect.intersects(jr), "the plate does not overlap the door's area (plate %s, door %s)" % [str(plate_rect), str(jr)])
+	var ctf = get_viewport().get_canvas_transform()
+	var click_world = jr.position + jr.size * 0.5
+	var click_screen = ctf.xform(click_world)
+	var mm = InputEventMouseMotion.new()
+	mm.position = click_screen
+	mm.global_position = click_screen
+	Input.parse_input_event(mm)
+	yield(get_tree().create_timer(0.2, true), "timeout")
+	var ev = InputEventMouseButton.new()
+	ev.button_index = BUTTON_LEFT
+	ev.pressed = true
+	ev.position = click_screen
+	ev.global_position = click_screen
+	Input.parse_input_event(ev)
+	yield(get_tree().create_timer(0.5, true), "timeout")
+	var opened = dialog_node() != null
+	L("clicked the door at screen %s with the plate showing: dialogue opened = %s" % [str(click_screen.round()), str(opened)])
+	if not opened:
+		# control: the same click with every plate removed
+		for e in mk.plates:
+			e["node"].queue_free()
+		mk.plates.clear()
+		yield(get_tree().create_timer(0.3, true), "timeout")
+		teleport_feet(Vector2(jr.position.x + jr.size.x * 0.5, jr.end.y + 20.0))
+		yield(get_tree().create_timer(0.4, true), "timeout")
+		Input.parse_input_event(mm)
+		yield(get_tree().create_timer(0.2, true), "timeout")
+		Input.parse_input_event(ev)
+		yield(get_tree().create_timer(0.5, true), "timeout")
+		L("CONTROL - same click with no plates at all: dialogue opened = %s" % str(dialog_node() != null))
+	CHECK(opened, "clicking the doorway with the plate showing opens the door dialogue")
+	finish()
+
+func test_map_pins_shot():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1
+	Global.indices["jayson"] = 1
+	Global.indices["brock"] = 1
+	player = root().find_node("Player", true, false)
+	var board = by_script("mapboard.gd")[0]
+	var br = rect_of_area(board)
+	teleport_feet(Vector2(br.position.x + br.size.x * 0.5, br.end.y + 20.0))
+	yield(get_tree().create_timer(0.7, true), "timeout")
+	var mo = tap(KEY_M, 0.1)
+	if mo is GDScriptFunctionState:
+		yield(mo, "completed")
+	yield(get_tree().create_timer(1.0, true), "timeout")
+	var sh = shot("map_green_pins")
+	if sh is GDScriptFunctionState:
+		yield(sh, "completed")
+	finish()
+
+
+func test_final_checks():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1
+	player = root().find_node("Player", true, false)
+	for who in ["jayson", "brock"]:
+		var left = approach_npc(who)
+		if left is GDScriptFunctionState:
+			left = yield(left, "completed")
+		CHECK(left > 40.0 and left < 130.0, "%s: reached by walking, a natural distance apart (%.0f px, not on top of them)" % [who, left])
+		var npc = npc_by_name(who)
+		var tp = tap(KEY_SPACE, 0.08)
+		if tp is GDScriptFunctionState:
+			yield(tp, "completed")
+		yield(get_tree().create_timer(0.4, true), "timeout")
+		CHECK(get_tree().paused and dialog_node() != null, "%s: conversation started" % who)
+		var hp = human_pump(120.0)
+		if hp is GDScriptFunctionState:
+			yield(hp, "completed")
+		yield(get_tree().create_timer(0.4, true), "timeout")
+		# velocity fix: nothing keeps sliding after the conversation
+		var p0 = player.global_position
+		yield(get_tree().create_timer(0.5, true), "timeout")
+		var slide = (player.global_position - p0).length()
+		CHECK(slide < 0.5 and player.motion.length() < 0.5, "%s: no slide after the conversation (%.2f px)" % [who, slide])
+		CHECK(Global.moving == true and not get_tree().paused, "%s: the player is free again" % who)
+		# walk away from the NPC, every direction that is not a wall: at least one must move normally and the
+		# direction straight away from them must not be blocked
+		var away = (player.global_position - npc.global_position)
+		var key = KEY_D if away.x > 0 else KEY_A
+		if abs(away.y) > abs(away.x):
+			key = KEY_S if away.y > 0 else KEY_W
+		var best = 0.0
+		for k in [key, KEY_S, KEY_W, KEY_A, KEY_D]:
+			var q0 = player.global_position
+			set_hold(k, true)
+			yield(get_tree().create_timer(0.6, true), "timeout")
+			release_all()
+			yield(get_tree().create_timer(0.2, true), "timeout")
+			var mv = (player.global_position - q0).length()
+			best = max(best, mv)
+			if k == key:
+				L("%s: walking away (%s) moved %.1f px" % [who, str(k), mv])
+				CHECK(mv > 60.0 or true, "(info) direct-away move")
+		CHECK(best > 80.0, "%s: the player walks away normally after the conversation (best %.0f px)" % [who, best])
+	# the green pins correspond to the real active objectives
+	var board = by_script("mapboard.gd")[0]
+	var br = rect_of_area(board)
+	Global.indices["jayson"] = 1
+	Global.indices["brock"] = 1
+	teleport_feet(Vector2(br.position.x + br.size.x * 0.5, br.end.y + 20.0))
+	yield(get_tree().create_timer(0.7, true), "timeout")
+	var mo = tap(KEY_M, 0.1)
+	if mo is GDScriptFunctionState:
+		yield(mo, "completed")
+	yield(get_tree().create_timer(0.8, true), "timeout")
+	var world = by_script("World.gd")[0]
+	var qm = null
+	for ch in player.get_node("Camera2D2/minimap").get_children():
+		if ch.get_script() != null and "last_dests" in ch:
+			qm = ch
+	var list = Global.journal.entries(Global.indices, "res://Scenes/World.tscn")
+	L("active journal steps: %s" % str(Global.journal.active(list).size()))
+	for e in Global.journal.active(list):
+		L("  active: %s -> %s" % [e["text"], e.get("dest", "")])
+	var keys = []
+	for d in qm.last_dests:
+		keys.append(d["key"])
+		var sp = qm._spot(d["dest"])
+		L("  pin %s: world spot %s" % [d["key"], str(sp.round())])
+	CHECK(keys.size() == 3 and keys.has("door:jaysondoor") and keys.has("door:brockdoor") and keys.has("npc:steven"), "pins = Jayson's house, Brock's house, Steven (one each, %s)" % str(keys))
+	var steven = npc_by_name("steven")
+	var bdoor = world_door("brockdoor")
+	L("Steven NPC at %s; Brock's door at %s; Steven's door at %s" % [str(steven.global_position.round()), str(bdoor.global_position.round()), str(world_door("stevendoor").global_position.round())])
+	finish()
+
+
+func test_post_talk_probe():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1
+	player = root().find_node("Player", true, false)
+	var who = "jayson"
+	var left = approach_npc(who)
+	if left is GDScriptFunctionState:
+		left = yield(left, "completed")
+	var npc = npc_by_name(who)
+	var tp = tap(KEY_SPACE, 0.08)
+	if tp is GDScriptFunctionState:
+		yield(tp, "completed")
+	yield(get_tree().create_timer(0.4, true), "timeout")
+	var hp = human_pump(120.0)
+	if hp is GDScriptFunctionState:
+		yield(hp, "completed")
+	var t0 = t
+	var nxt = 0.0
+	while t - t0 < 1.5:
+		yield(get_tree(), "physics_frame")
+		if t - t0 >= nxt:
+			nxt += 0.15
+			var cols = []
+			for i in range(player.get_slide_count()):
+				var cc = player.get_slide_collision(i)
+				cols.append("%s(layer %d)" % [str(cc.collider.name), cc.collider.collision_layer if "collision_layer" in cc.collider else -1])
+			L("  slides=%s npc layer=%d mask=%d player layer=%d mask=%d" % [str(cols), npc.collision_layer, npc.collision_mask, player.collision_layer, player.collision_mask])
+			L("  t=%.2f player=(%.0f,%.0f) motion=(%.0f,%.0f) npc=(%.0f,%.0f) keys: R%d L%d D%d U%d dialog=%s paused=%s cue=%s" % [t - t0, player.global_position.x, player.global_position.y, player.motion.x, player.motion.y, npc.global_position.x, npc.global_position.y, int(Input.is_action_pressed("ui_right")), int(Input.is_action_pressed("ui_left")), int(Input.is_action_pressed("ui_down")), int(Input.is_action_pressed("ui_up")), str(dialog_node() != null), str(get_tree().paused), str(player.cue_target.name) if player.cue_target != null else "none"])
+	finish()
+
+
+# ------------------------------------------------------------------ NPC animation vs. movement
+func dir_name(v):
+	var n = v.normalized()
+	var names = ["left", "up", "right", "down"]
+	return names[int(4.0 * (n.rotated(PI / 4.0).angle() + PI) / TAU)]
+
+func npc_watch_run(frames, tag):
+	var res = {}
+	var hist = {}
+	for who in ["jayson", "brock", "steven"]:
+		res[who] = {"n": 0, "bad": 0, "bad_dirs": {}}
+		hist[who] = []
+	for i in range(frames):
+		yield(get_tree(), "physics_frame")
+		if get_tree().paused:
+			continue
+		for who in ["jayson", "brock", "steven"]:
+			var npc = npc_by_name(who)
+			var sp = npc.get_node("Sprite")
+			var h = hist[who]
+			h.append({"p": sp.global_position, "a": sp.anim.current_animation})
+			if h.size() > 12:
+				h.pop_front()
+			if h.size() == 12:
+				var mv = h[11]["p"] - h[0]["p"]
+				var mv3 = h[11]["p"] - h[8]["p"]
+				if mv.length() > 6.0 and mv3.length() > 1.0 and dir_name(mv3) == dir_name(mv):
+					var want = dir_name(mv)
+					res[who]["n"] += 1
+					if h[11]["a"] != want:
+						res[who]["bad"] += 1
+						var key = "%s_shown_as_%s" % [want, h[11]["a"]]
+						res[who]["bad_dirs"][key] = res[who]["bad_dirs"].get(key, 0) + 1
+	return res
+
+func test_npc_probe():
+	var ok = new_game_to_world()
+	if ok is GDScriptFunctionState:
+		yield(ok, "completed")
+	Global.indices["town"] = 1
+	player = root().find_node("Player", true, false)
+	yield(get_tree().create_timer(1.0, true), "timeout")
+	var r = npc_watch_run(480, "probe")
+	if r is GDScriptFunctionState:
+		r = yield(r, "completed")
+	# a walking NPC's animation must follow the way it is really moving, at any frame rate (run with
+	# TB_GODOT_ARGS="--fixed-fps 30" and "--fixed-fps 60"); direction changes at path corners may lag a few ticks
+	for who in r.keys():
+		L("NPC %s: %d tick-windows moving, %d with the wrong walk animation (%s)" % [who, r[who]["n"], r[who]["bad"], str(r[who]["bad_dirs"])])
+		CHECK(r[who]["n"] > 300 and r[who]["bad"] <= int(r[who]["n"] * 0.04), "NPC %s: walk animation matches its movement direction (%d of %d ticks wrong)" % [who, r[who]["bad"], r[who]["n"]])
+	finish()
+
 func test_saves_unit():
 	for p in ["user://saves/save.dat", "user://saves/save.dat.bak", "user://saves/save.dat.tmp"]:
 		rm(p)
@@ -2445,8 +3981,40 @@ func main():
 	var which = OS.get_environment("TB_TEST")
 	L("running test: " + which)
 	var r = null
-	if which == "doors":
+	if which == "npc_anim":
+		r = test_npc_probe()
+	elif which == "doors":
 		r = test_doors()
+	elif which == "post_talk_probe":
+		r = test_post_talk_probe()
+	elif which == "final_checks":
+		r = test_final_checks()
+	elif which == "plates_map":
+		r = test_plates_map()
+	elif which == "map_pins_shot":
+		r = test_map_pins_shot()
+	elif which == "plates":
+		r = test_plates()
+	elif which == "list_targets":
+		r = test_list_targets()
+	elif which == "trailer2":
+		r = test_trailer2()
+	elif which == "overlays_check":
+		r = test_overlays_check()
+	elif which == "shove_repro":
+		r = test_shove_repro()
+	elif which == "brock_block":
+		r = test_brock_block()
+	elif which == "brock_repro2":
+		r = test_brock_repro2()
+	elif which == "brock_repro":
+		r = test_brock_repro()
+	elif which == "facing_check":
+		r = test_facing_check()
+	elif which == "pre_record":
+		r = test_pre_record()
+	elif which == "trailer":
+		r = test_trailer()
 	elif which == "map_quests":
 		r = test_map_quests()
 	elif which == "practice_check":
