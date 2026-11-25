@@ -1,6 +1,7 @@
 #!/bin/bash
 # Run the regression tests against an *exported* macOS build, never touching real saves.
 #   tests/run_app_tests.sh /path/to/Turtleburg.app <doors|saves|saves_unit|blur|layering|playthrough> [more...]
+# Extra engine flags (e.g. TB_GODOT_ARGS="--fixed-fps 30") are passed through.
 # The .app is copied to a temp folder, a test hook is injected through override.cfg next to the
 # executable (re-signed ad hoc), and HOME points at a throw-away profile.
 set -u
@@ -17,7 +18,7 @@ run() {  # run <TB_TEST> <hook script>
   printf '[autoload]\n\nT="*%s"\n' "$HERE/tests/$script" > "$WORK/Turtleburg.app/Contents/MacOS/override.cfg"
   codesign --force --deep --sign - "$WORK/Turtleburg.app" >/dev/null 2>&1
   # the app writes to a file (not a pipe) so a slow reader can never stall it; filtered afterwards
-  TB_TEST="$test" HOME="$FAKE_HOME" "$EXE" > "$OUT/$test.raw" 2>&1
+  TB_TEST="$test" HOME="$FAKE_HOME" "$EXE" ${TB_GODOT_ARGS:-} > "$OUT/$test.raw" 2>&1
   sed 's/\x1b\[[0-9;]*m//g' "$OUT/$test.raw" > "$OUT/$test.log"
   grep -E "\[TEST\]|\[LAYER\] (SUMMARY|scene)|\[BOT\] (PASS|\*\*\*|RESULT)|SCRIPT ERROR" "$OUT/$test.log"
 }
